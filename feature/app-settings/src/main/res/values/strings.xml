@@ -49,4 +49,6 @@
     <string name="system">System</string>
     <string name="secure">Secure</string>
     <string name="global">Global</string>
+    <string name="quick_settings_tip_title">Tips!</string>
+    <string name="quick_settings_tip_message">Add the Geto+ tile to your Quick Settings panel to apply your settings more conveniently~</string>
 </resources>

@@ -29,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.lazy.items
@@ -36,6 +37,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.BottomAppBar
 import androidx.compose.material3.BottomAppBarDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -59,11 +61,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.geto.designsystem.component.DialogContainer
 import com.android.geto.designsystem.icon.GetoIcons
 import com.android.geto.domain.common.GLOBAL_CONFIG_UID
 import com.android.geto.domain.model.AddAppSettingResult
@@ -152,6 +156,8 @@ internal fun AppSettingsScreen(
 
     var showWriteSecureSettingsDialog by remember { mutableStateOf(false) }
 
+    var showQuickSettingsTipDialog by remember { mutableStateOf(false) }
+
     AppSettingsLaunchedEffects(
         snackbarHostState = snackbarHostState,
         addAppSettingResult = addAppSettingResult,
@@ -187,6 +193,10 @@ internal fun AppSettingsScreen(
         onGetSecureSettingsByName = onGetSecureSettingsByName,
     )
 
+    if (showQuickSettingsTipDialog) {
+        QuickSettingsTipDialog(onDismissRequest = { showQuickSettingsTipDialog = false })
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -215,6 +225,9 @@ internal fun AppSettingsScreen(
                 onSettingsSuggestIconClick = {
                     showTemplateDialog = true
                 },
+                onQuickSettingsTipClick = {
+                    showQuickSettingsTipDialog = true
+                },
                 isConfigApplied = if (appSettingsUiState is AppSettingsUiState.Success) appSettingsUiState.isConfigApplied else false,
                 onFloatingActionButtonClick = {
                     if (appSettingsUiState is AppSettingsUiState.Success) {
@@ -241,6 +254,7 @@ internal fun AppSettingsScreen(
                 is AppSettingsUiState.Success -> {
                     if (appSettingsUiState.appSettings.isNotEmpty()) {
                         SuccessState(
+                            isConfigApplied = appSettingsUiState.isConfigApplied,
                             appSettingsUiState = appSettingsUiState,
                             onCheckAppSetting = onCheckAppSetting,
                             onDeleteAppSettingsItem = onDeleteAppSetting,
@@ -446,6 +460,7 @@ private fun AppSettingsDialogs(
 private fun AppSettingsBottomAppBar(
     onAddConfigIconClick: () -> Unit,
     onSettingsSuggestIconClick: () -> Unit,
+    onQuickSettingsTipClick: () -> Unit,
     isConfigApplied: Boolean,
     onFloatingActionButtonClick: () -> Unit,
 ) {
@@ -454,6 +469,7 @@ private fun AppSettingsBottomAppBar(
             AppSettingsBottomAppBarActions(
                 onAddConfigIconClick = onAddConfigIconClick,
                 onSettingsSuggestIconClick = onSettingsSuggestIconClick,
+                onQuickSettingsTipClick = onQuickSettingsTipClick,
             )
         },
         floatingActionButton = {
@@ -486,6 +502,7 @@ private fun AppSettingsFloatingActionButton(
 private fun AppSettingsBottomAppBarActions(
     onAddConfigIconClick: () -> Unit,
     onSettingsSuggestIconClick: () -> Unit,
+    onQuickSettingsTipClick: () -> Unit,
 ) {
     IconButton(onClick = onAddConfigIconClick) {
         Icon(
@@ -499,6 +516,13 @@ private fun AppSettingsBottomAppBarActions(
     ) {
         Icon(
             imageVector = GetoIcons.SettingsSuggest,
+            contentDescription = null,
+        )
+    }
+
+    IconButton(onClick = onQuickSettingsTipClick) {
+        Icon(
+            imageVector = GetoIcons.Info,
             contentDescription = null,
         )
     }
@@ -535,6 +559,7 @@ private fun EmptyState(
 @Composable
 private fun SuccessState(
     modifier: Modifier = Modifier,
+    isConfigApplied: Boolean,
     appSettingsUiState: AppSettingsUiState.Success,
     onCheckAppSetting: (AppSetting) -> Unit,
     onDeleteAppSettingsItem: (AppSetting) -> Unit,
@@ -543,6 +568,7 @@ private fun SuccessState(
     LazyColumn(modifier = modifier) {
         items(items = appSettingsUiState.appSettings, key = { it.id }) { appSettings ->
             AppSettingItem(
+                isConfigApplied = isConfigApplied,
                 appSetting = appSettings,
                 onCheckedChange = { check ->
                     onCheckAppSetting(
@@ -563,13 +589,18 @@ private fun SuccessState(
 @Composable
 private fun LazyItemScope.AppSettingItem(
     modifier: Modifier = Modifier,
+    isConfigApplied: Boolean,
     appSetting: AppSetting,
     onCheckedChange: (Boolean) -> Unit,
     onDeleteClick: () -> Unit,
     onEditClick: () -> Unit,
 ) {
+    val enabled = !isConfigApplied
+
     ListItem(
-        modifier = modifier.animateItem(),
+        modifier = modifier
+            .animateItem()
+            .alpha(if (isConfigApplied) 0.5f else 1f),
         headlineContent = {
             Text(
                 text = appSetting.label,
@@ -588,22 +619,64 @@ private fun LazyItemScope.AppSettingItem(
         leadingContent = {
             Checkbox(
                 checked = appSetting.enabled,
+                enabled = enabled,
                 onCheckedChange = onCheckedChange,
             )
         },
         trailingContent = {
             Row {
-                IconButton(onClick = onEditClick) {
+                IconButton(
+                    onClick = onEditClick,
+                    enabled = enabled,
+                ) {
                     Icon(
                         imageVector = GetoIcons.Edit,
                         contentDescription = null,
                     )
                 }
-                IconButton(onClick = onDeleteClick) {
+                IconButton(
+                    onClick = onDeleteClick,
+                    enabled = enabled,
+                ) {
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
                     )
+                }
+            }
+        },
+    )
+}
+
+@Composable
+private fun QuickSettingsTipDialog(onDismissRequest: () -> Unit) {
+    DialogContainer(
+        onDismissRequest = onDismissRequest,
+        content = {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            ) {
+                Text(
+                    text = stringResource(R.string.quick_settings_tip_title),
+                    style = MaterialTheme.typography.titleLarge,
+                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                Text(
+                    text = stringResource(R.string.quick_settings_tip_message),
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Button(
+                    modifier = Modifier.align(Alignment.End),
+                    onClick = onDismissRequest,
+                ) {
+                    Text(text = "Got it")
                 }
             }
         },
