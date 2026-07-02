@@ -134,7 +134,7 @@ internal fun AppSettingDialog(
         ) {
             Text(
                 modifier = modifier.padding(10.dp),
-                text = if (isEditing) stringResource(R.string.edit_setting) else "Add new setting",
+                text = if (isEditing) stringResource(R.string.edit_setting) else stringResource(R.string.add_app_setting),
                 style = MaterialTheme.typography.titleLarge,
             )
 

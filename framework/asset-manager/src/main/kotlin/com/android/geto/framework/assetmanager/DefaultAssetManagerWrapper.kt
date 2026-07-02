@@ -37,7 +37,7 @@ internal class DefaultAssetManagerWrapper @Inject constructor(
 ) : AssetManagerWrapper {
     private val appSettingsType = object : TypeToken<List<AppSettingTemplate>>() {}.type
 
-    var appSettingTemplatesJson = "AppSettingTemplates.json"
+    private val appSettingTemplatesJson = "AppSettingTemplates.json"
 
     override suspend fun getAppSettingTemplates(): List<AppSettingTemplate> {
         val jsonString = withContext(ioDispatcher) {
