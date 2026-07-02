@@ -1,2 +1,0 @@
-- Shortcuts can now launch applications directly with settings applied
-- Bug fixes and stability improvements

@@ -1,4 +1,0 @@
-What's new
-- Auto-Launch
-- Clean app settings from the uninstalled applications
-- Improved performance and stability

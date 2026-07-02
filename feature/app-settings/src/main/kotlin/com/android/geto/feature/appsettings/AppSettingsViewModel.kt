@@ -17,31 +17,27 @@
  */
 package com.android.geto.feature.appsettings
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.navigation.toRoute
 import com.android.geto.domain.framework.AssetManagerWrapper
-import com.android.geto.domain.framework.PackageManagerWrapper
 import com.android.geto.domain.model.AddAppSettingResult
 import com.android.geto.domain.model.AppSetting
 import com.android.geto.domain.model.AppSettingTemplate
 import com.android.geto.domain.model.AppSettingsResult
-import com.android.geto.domain.model.RequestPinShortcutResult
 import com.android.geto.domain.model.SecureSetting
 import com.android.geto.domain.model.SettingType
 import com.android.geto.domain.repository.AppSettingsRepository
+import com.android.geto.domain.repository.UserDataRepository
 import com.android.geto.domain.usecase.AddAppSettingUseCase
 import com.android.geto.domain.usecase.ApplyAppSettingsUseCase
 import com.android.geto.domain.usecase.GetSecureSettingsByNameUseCase
-import com.android.geto.domain.usecase.RequestPinShortcutUseCase
 import com.android.geto.domain.usecase.RevertAppSettingsUseCase
-import com.android.geto.feature.appsettings.navigation.AppSettingsRouteData
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
@@ -50,31 +46,17 @@ import javax.inject.Inject
 
 @HiltViewModel
 class AppSettingsViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val appSettingsRepository: AppSettingsRepository,
-    private val packageManagerWrapper: PackageManagerWrapper,
+    private val userDataRepository: UserDataRepository,
     private val applyAppSettingsUseCase: ApplyAppSettingsUseCase,
     private val revertAppSettingsUseCase: RevertAppSettingsUseCase,
-    private val requestPinShortcutUseCase: RequestPinShortcutUseCase,
     private val addAppSettingUseCase: AddAppSettingUseCase,
     private val assetManagerWrapper: AssetManagerWrapper,
     private val getSecureSettingsByNameUseCase: GetSecureSettingsByNameUseCase,
 ) : ViewModel() {
-    private val appSettingsRouteData = savedStateHandle.toRoute<AppSettingsRouteData>()
-
-    private val componentName = appSettingsRouteData.componentName
 
     private var _secureSettings = MutableStateFlow<List<SecureSetting>>(emptyList())
     val secureSettings = _secureSettings.asStateFlow()
-
-    private var _activityIcon = MutableStateFlow<ByteArray?>(null)
-    val activityIcon = _activityIcon.onStart {
-        getActivityIcon()
-    }.stateIn(
-        scope = viewModelScope,
-        started = SharingStarted.Lazily,
-        initialValue = null,
-    )
 
     private val _addAppSettingsResult = MutableStateFlow<AddAppSettingResult?>(null)
     val addAppSettingsResult = _addAppSettingsResult.asStateFlow()
@@ -85,16 +67,19 @@ class AppSettingsViewModel @Inject constructor(
     private val _revertAppSettingsResult = MutableStateFlow<AppSettingsResult?>(null)
     val revertAppSettingsResult = _revertAppSettingsResult.asStateFlow()
 
-    private val _requestPinShortcutResult = MutableStateFlow<RequestPinShortcutResult?>(null)
-    val requestPinShortcutResult = _requestPinShortcutResult.asStateFlow()
-
-    val appSettingsUiState =
-        appSettingsRepository.getAppSettingsFlowByComponentName(componentName = componentName)
-            .map(AppSettingsUiState::Success).stateIn(
-                scope = viewModelScope,
-                started = SharingStarted.WhileSubscribed(5_000),
-                initialValue = AppSettingsUiState.Loading,
-            )
+    val appSettingsUiState = combine(
+        userDataRepository.userData,
+        appSettingsRepository.appSettingsFlow,
+    ) { userData, appSettings ->
+        AppSettingsUiState.Success(
+            isConfigApplied = userData.isConfigApplied,
+            appSettings = appSettings,
+        )
+    }.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5_000),
+        initialValue = AppSettingsUiState.Loading,
+    )
 
     private var _appSettingTemplates =
         MutableStateFlow<List<AppSettingTemplate>>(emptyList())
@@ -106,9 +91,21 @@ class AppSettingsViewModel @Inject constructor(
         initialValue = emptyList(),
     )
 
-    fun applyAppSettings() {
+    fun toggleConfig(isConfigApplied: Boolean) {
         viewModelScope.launch {
-            _applyAppSettingsResult.update { applyAppSettingsUseCase(componentName = componentName) }
+            if (isConfigApplied) {
+                val result = revertAppSettingsUseCase()
+                _revertAppSettingsResult.update { result }
+                if (result == AppSettingsResult.Success) {
+                    userDataRepository.updateConfigApplied(false)
+                }
+            } else {
+                val result = applyAppSettingsUseCase()
+                _applyAppSettingsResult.update { result }
+                if (result == AppSettingsResult.Success) {
+                    userDataRepository.updateConfigApplied(true)
+                }
+            }
         }
     }
 
@@ -124,40 +121,16 @@ class AppSettingsViewModel @Inject constructor(
         }
     }
 
+    fun updateAppSetting(appSetting: AppSetting) {
+        viewModelScope.launch {
+            appSettingsRepository.upsertAppSetting(appSetting)
+        }
+    }
+
     fun addAppSetting(appSetting: AppSetting) {
         viewModelScope.launch {
             _addAppSettingsResult.update {
                 addAppSettingUseCase(appSetting = appSetting)
-            }
-        }
-    }
-
-    fun getActivityIcon() {
-        viewModelScope.launch {
-            _activityIcon.update { packageManagerWrapper.getActivityIcon(componentName = componentName) }
-        }
-    }
-
-    fun revertAppSettings() {
-        viewModelScope.launch {
-            _revertAppSettingsResult.update { revertAppSettingsUseCase(componentName = componentName) }
-        }
-    }
-
-    fun requestPinShortcut(
-        icon: ByteArray?,
-        shortLabel: String,
-        longLabel: String,
-    ) {
-        viewModelScope.launch {
-            _requestPinShortcutResult.update {
-                requestPinShortcutUseCase(
-                    componentName = componentName,
-                    icon = icon,
-                    id = componentName,
-                    shortLabel = shortLabel,
-                    longLabel = longLabel,
-                )
             }
         }
     }
@@ -183,10 +156,6 @@ class AppSettingsViewModel @Inject constructor(
 
     fun resetApplyAppSettingsResult() {
         _applyAppSettingsResult.update { null }
-    }
-
-    fun resetRequestPinShortcutResult() {
-        _requestPinShortcutResult.update { null }
     }
 
     fun resetRevertAppSettingsResult() {

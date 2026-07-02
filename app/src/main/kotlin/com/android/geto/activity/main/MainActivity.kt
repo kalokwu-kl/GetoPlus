@@ -29,19 +29,14 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.compose.rememberNavController
 import com.android.geto.designsystem.theme.GetoTheme
-import com.android.geto.framework.launcherapps.AndroidLauncherAppsWrapper
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper
 import com.android.geto.navigation.GetoNavHost
-import com.android.geto.ui.local.LocalLauncherApps
 import com.android.geto.ui.local.LocalNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-    @Inject
-    lateinit var androidLauncherAppsWrapper: AndroidLauncherAppsWrapper
-
     @Inject
     lateinit var androidNotificationManagerWrapper: AndroidNotificationManagerWrapper
 
@@ -56,7 +51,6 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             CompositionLocalProvider(
-                LocalLauncherApps provides androidLauncherAppsWrapper,
                 LocalNotificationManager provides androidNotificationManagerWrapper,
             ) {
                 val navController = rememberNavController()

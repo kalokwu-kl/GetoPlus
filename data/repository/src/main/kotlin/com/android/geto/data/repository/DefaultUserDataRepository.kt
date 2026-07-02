@@ -36,4 +36,8 @@ class DefaultUserDataRepository @Inject constructor(
     override suspend fun updateDynamicTheme(dynamicTheme: Boolean) {
         userPreferencesDataSource.updateDynamicColor(dynamicTheme = dynamicTheme)
     }
+
+    override suspend fun updateConfigApplied(isConfigApplied: Boolean) {
+        userPreferencesDataSource.updateConfigApplied(isConfigApplied = isConfigApplied)
+    }
 }

@@ -26,5 +26,6 @@ option java_multiple_files = true;
 message UserPreferences {
   ThemeProto theme = 1;
   bool dynamicTheme = 2;
+  bool isConfigApplied = 3;
 }
 

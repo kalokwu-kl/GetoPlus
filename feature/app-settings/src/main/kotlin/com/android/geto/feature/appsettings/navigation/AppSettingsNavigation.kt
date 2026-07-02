@@ -17,31 +17,16 @@
  */
 package com.android.geto.feature.appsettings.navigation
 
-import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
-import androidx.navigation.toRoute
 import com.android.geto.feature.appsettings.AppSettingsRoute
+import kotlinx.serialization.Serializable
 
-fun NavController.navigateToAppSettings(
-    componentName: String,
-    activityLabel: String,
-) {
-    navigate(
-        AppSettingsRouteData(
-            componentName = componentName,
-            activityLabel = activityLabel,
-        ),
-    )
-}
+@Serializable
+object AppSettingsRouteData
 
-fun NavGraphBuilder.appSettingsScreen(onNavigationIconClick: () -> Unit) {
-    composable<AppSettingsRouteData> { backStackEntry ->
-        val appSettingsRouteData: AppSettingsRouteData = backStackEntry.toRoute()
-
-        AppSettingsRoute(
-            appSettingsRouteData = appSettingsRouteData,
-            onNavigationIconClick = onNavigationIconClick,
-        )
+fun NavGraphBuilder.appSettingsScreen(onSettingsClick: () -> Unit) {
+    composable<AppSettingsRouteData> {
+        AppSettingsRoute(onSettingsClick = onSettingsClick)
     }
 }

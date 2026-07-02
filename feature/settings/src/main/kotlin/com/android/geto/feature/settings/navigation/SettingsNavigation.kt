@@ -18,23 +18,20 @@
 package com.android.geto.feature.settings.navigation
 
 import androidx.navigation.NavController
-import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 import com.android.geto.feature.settings.SettingsRoute
+import kotlinx.serialization.Serializable
+
+@Serializable
+object SettingsRouteData
 
 fun NavController.navigateToSettings() {
-    navigate(SettingsRouteData) {
-        popUpTo(graph.findStartDestination().id) {
-            saveState = true
-        }
-        launchSingleTop = true
-        restoreState = true
-    }
+    navigate(SettingsRouteData)
 }
 
-fun NavGraphBuilder.settingsScreen() {
+fun NavGraphBuilder.settingsScreen(onBackClick: () -> Unit) {
     composable<SettingsRouteData> {
-        SettingsRoute()
+        SettingsRoute(onBackClick = onBackClick)
     }
 }

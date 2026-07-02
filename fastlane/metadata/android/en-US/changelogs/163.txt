@@ -1,4 +1,0 @@
-What's new
-- Integrated UsageStatsManager to monitor app usage
-- Automatically apply settings when specific apps are opened
-- Revert settings when apps are closed

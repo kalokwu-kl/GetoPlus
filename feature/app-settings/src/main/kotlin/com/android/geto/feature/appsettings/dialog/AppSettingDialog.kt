@@ -71,22 +71,26 @@ internal fun AppSettingDialog(
     modifier: Modifier = Modifier,
     componentName: String,
     secureSettings: List<SecureSetting>,
+    appSetting: AppSetting? = null,
     onAddAppSetting: (AppSetting) -> Unit,
+    onUpdateAppSetting: ((AppSetting) -> Unit)? = null,
     onDismissRequest: () -> Unit,
     onGetSecureSettingsByName: (
         settingType: SettingType,
         text: String,
     ) -> Unit,
 ) {
-    var selectedRadioOptionIndex by remember { mutableIntStateOf(0) }
+    val isEditing = appSetting != null
 
-    var label by remember { mutableStateOf("") }
+    var selectedRadioOptionIndex by remember(appSetting) { mutableIntStateOf(appSetting?.settingType?.ordinal ?: 0) }
 
-    var key by remember { mutableStateOf("") }
+    var label by remember(appSetting) { mutableStateOf(appSetting?.label ?: "") }
 
-    var valueOnLaunch by remember { mutableStateOf("") }
+    var key by remember(appSetting) { mutableStateOf(appSetting?.key ?: "") }
 
-    var valueOnRevert by remember { mutableStateOf("") }
+    var valueOnLaunch by remember(appSetting) { mutableStateOf(appSetting?.valueOnLaunch ?: "") }
+
+    var valueOnRevert by remember(appSetting) { mutableStateOf(appSetting?.valueOnRevert ?: "") }
 
     var showLabelError by remember { mutableStateOf(false) }
 
@@ -130,7 +134,7 @@ internal fun AppSettingDialog(
         ) {
             Text(
                 modifier = modifier.padding(10.dp),
-                text = stringResource(R.string.add_app_setting),
+                text = if (isEditing) stringResource(R.string.edit_setting) else "Add new setting",
                 style = MaterialTheme.typography.titleLarge,
             )
 
@@ -171,6 +175,7 @@ internal fun AppSettingDialog(
             )
 
             AppSettingDialogButtons(
+                isEditing = isEditing,
                 onCancelClick = onDismissRequest,
                 onAddClick = {
                     showLabelError = label.isBlank()
@@ -190,17 +195,32 @@ internal fun AppSettingDialog(
                         !showValueOnLaunchError &&
                         !showValueOnRevertError
                     ) {
-                        onAddAppSetting(
-                            AppSetting(
-                                enabled = true,
-                                settingType = SettingType.entries[selectedRadioOptionIndex],
-                                componentName = componentName,
-                                label = label,
-                                key = key,
-                                valueOnLaunch = valueOnLaunch,
-                                valueOnRevert = valueOnRevert,
-                            ),
-                        )
+                        if (isEditing) {
+                            onUpdateAppSetting?.invoke(
+                                AppSetting(
+                                    id = appSetting!!.id,
+                                    enabled = appSetting!!.enabled,
+                                    settingType = SettingType.entries[selectedRadioOptionIndex],
+                                    componentName = componentName,
+                                    label = label,
+                                    key = key,
+                                    valueOnLaunch = valueOnLaunch,
+                                    valueOnRevert = valueOnRevert,
+                                ),
+                            )
+                        } else {
+                            onAddAppSetting(
+                                AppSetting(
+                                    enabled = true,
+                                    settingType = SettingType.entries[selectedRadioOptionIndex],
+                                    componentName = componentName,
+                                    label = label,
+                                    key = key,
+                                    valueOnLaunch = valueOnLaunch,
+                                    valueOnRevert = valueOnRevert,
+                                ),
+                            )
+                        }
 
                         onDismissRequest()
                     }
@@ -427,6 +447,7 @@ private fun AppSettingDialogTextFieldWithDropdownMenu(
 @Composable
 private fun AppSettingDialogButtons(
     modifier: Modifier = Modifier,
+    isEditing: Boolean = false,
     onCancelClick: () -> Unit,
     onAddClick: () -> Unit,
 ) {
@@ -447,7 +468,7 @@ private fun AppSettingDialogButtons(
             modifier = Modifier
                 .padding(5.dp),
         ) {
-            Text(text = stringResource(R.string.add))
+            Text(text = stringResource(if (isEditing) R.string.save else R.string.add))
         }
     }
 }

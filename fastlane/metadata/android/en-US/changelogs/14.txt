@@ -1,2 +1,0 @@
-What's new
-- Decrease APK size by 86%

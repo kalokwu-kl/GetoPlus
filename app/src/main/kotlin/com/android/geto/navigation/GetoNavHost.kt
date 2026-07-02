@@ -28,17 +28,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.android.geto.R
-import com.android.geto.feature.apps.navigation.AppsRouteData
-import com.android.geto.feature.apps.navigation.appsScreen
-import com.android.geto.feature.apps.navigation.navigateToApps
+import com.android.geto.feature.appsettings.navigation.AppSettingsRouteData
 import com.android.geto.feature.appsettings.navigation.appSettingsScreen
-import com.android.geto.feature.appsettings.navigation.navigateToAppSettings
-import com.android.geto.feature.home.navigation.HomeRouteData
-import com.android.geto.feature.home.navigation.homeScreen
 import com.android.geto.feature.settings.navigation.navigateToSettings
 import com.android.geto.feature.settings.navigation.settingsScreen
-import com.android.geto.navigation.TopLevelDestination.APPS
-import com.android.geto.navigation.TopLevelDestination.SETTINGS
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
@@ -51,26 +44,11 @@ fun GetoNavHost(navController: NavHostController) {
 
     NavHost(
         navController = navController,
-        startDestination = HomeRouteData::class,
+        startDestination = AppSettingsRouteData::class,
     ) {
-        homeScreen(
-            snackbarHostState = snackbarHostState,
-            topLevelDestinations = TopLevelDestination.entries,
-            startDestination = AppsRouteData::class,
-            onClickHomeDestination = { homeNavHostController, homeDestination ->
-                when (homeDestination) {
-                    APPS -> homeNavHostController.navigateToApps()
-                    SETTINGS -> homeNavHostController.navigateToSettings()
-                }
-            },
-            builder = {
-                appsScreen(onClickApp = navController::navigateToAppSettings)
+        appSettingsScreen(onSettingsClick = navController::navigateToSettings)
 
-                settingsScreen()
-            },
-        )
-
-        appSettingsScreen(onNavigationIconClick = navController::navigateUp)
+        settingsScreen(onBackClick = navController::navigateUp)
     }
 }
 

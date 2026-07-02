@@ -21,9 +21,10 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.android.geto.common.ApplicationScope
+import com.android.geto.domain.model.AppSettingsResult
+import com.android.geto.domain.repository.UserDataRepository
 import com.android.geto.domain.usecase.RevertAppSettingsUseCase
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper
-import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper.Companion.NOTIFICATION_EXTRA_COMPONENT_NAME
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper.Companion.NOTIFICATION_EXTRA_NOTIFICATION_ID
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -41,17 +42,21 @@ class RevertSettingsBroadcastReceiver @Inject constructor() : BroadcastReceiver(
     lateinit var revertAppSettingsUseCase: RevertAppSettingsUseCase
 
     @Inject
+    lateinit var userDataRepository: UserDataRepository
+
+    @Inject
     lateinit var notificationManagerWrapper: AndroidNotificationManagerWrapper
 
     override fun onReceive(context: Context?, intent: Intent?) {
-        val componentName = intent?.extras?.getString(NOTIFICATION_EXTRA_COMPONENT_NAME) ?: return
-
-        val notificationId = intent.extras?.getInt(NOTIFICATION_EXTRA_NOTIFICATION_ID) ?: return
+        val notificationId = intent?.extras?.getInt(NOTIFICATION_EXTRA_NOTIFICATION_ID) ?: return
 
         appScope.launch {
-            revertAppSettingsUseCase(componentName = componentName)
+            val result = revertAppSettingsUseCase()
 
-            notificationManagerWrapper.cancel(notificationId)
+            if (result == AppSettingsResult.Success) {
+                userDataRepository.updateConfigApplied(false)
+                notificationManagerWrapper.cancel(notificationId)
+            }
         }
     }
 }

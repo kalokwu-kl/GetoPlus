@@ -37,7 +37,7 @@ import com.android.geto.designsystem.component.DialogContainer
 import com.android.geto.feature.appsettings.R
 
 @Composable
-internal fun WriteSecureSettingsDialog(
+fun WriteSecureSettingsDialog(
     modifier: Modifier = Modifier,
     onDismissRequest: () -> Unit,
 ) {

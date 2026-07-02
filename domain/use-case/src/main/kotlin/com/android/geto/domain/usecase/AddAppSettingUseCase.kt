@@ -34,7 +34,7 @@ class AddAppSettingUseCase @Inject constructor(
 ) {
     suspend operator fun invoke(appSetting: AppSetting): AddAppSettingResult = withContext(defaultDispatcher) {
         val keys =
-            appSettingsRepository.getAppSettingsByComponentName(componentName = appSetting.componentName)
+            appSettingsRepository.getAppSettings()
                 .map { it.key }
 
         if (appSetting.key !in keys) {

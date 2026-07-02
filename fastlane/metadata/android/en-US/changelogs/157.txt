@@ -1,2 +1,0 @@
-What's new
-- Fixed a bug where unchecked app settings cannot launch the Application

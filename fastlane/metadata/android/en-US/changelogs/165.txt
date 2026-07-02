@@ -1,2 +1,0 @@
-What's new
-- Added Shizuku support to grant WRITE_SECURE_SETTINGS so you don't need third party apps anymore

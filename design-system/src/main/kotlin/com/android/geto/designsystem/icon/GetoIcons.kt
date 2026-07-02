@@ -19,11 +19,16 @@ package com.android.geto.designsystem.icon
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.AppShortcut
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Error
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsSuggest
@@ -37,5 +42,10 @@ object GetoIcons {
     val Shortcut = Icons.Default.AppShortcut
     val SettingsSuggest = Icons.Default.SettingsSuggest
     val Add = Icons.Default.Add
-    val ArrowForward = Icons.AutoMirrored.Filled.ArrowForward
+    val PlayArrow = Icons.Filled.PlayArrow
+    val Edit = Icons.Default.Edit
+    val CheckCircle = Icons.Default.CheckCircle
+    val Error = Icons.Default.Error
+    val Info = Icons.Default.Info
+    val Notifications = Icons.Default.Notifications
 }

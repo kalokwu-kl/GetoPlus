@@ -22,6 +22,7 @@ import com.android.geto.data.room.model.AppSettingEntity
 import com.android.geto.domain.model.AppSetting
 import com.android.geto.domain.repository.AppSettingsRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
@@ -42,16 +43,8 @@ class DefaultAppSettingsRepository @Inject constructor(private val appSettingsDa
         appSettingsDao.deleteAppSettingEntity(entity = appSetting.asEntity())
     }
 
-    override fun getAppSettingsFlowByComponentName(componentName: String): Flow<List<AppSetting>> {
-        return appSettingsDao.getAppSettingEntitiesFlowByComponentName(componentName = componentName).map { entities ->
-            entities.map { entity ->
-                entity.asExternalModel()
-            }
-        }
-    }
-
-    override suspend fun getAppSettingsByComponentName(componentName: String): List<AppSetting> {
-        return appSettingsDao.getAppSettingEntitiesByComponentName(componentName = componentName).map { entity ->
+    override suspend fun getAppSettings(): List<AppSetting> {
+        return appSettingsDao.getAppSettingEntitiesFlow().first().map { entity ->
             entity.asExternalModel()
         }
     }

@@ -40,6 +40,7 @@ class UserPreferencesDataSource @Inject constructor(private val userPreferences:
                 ThemeProto.THEME_DARK -> Theme.DARK
             },
             dynamicTheme = it.dynamicTheme,
+            isConfigApplied = it.isConfigApplied,
         )
     }
 
@@ -58,6 +59,12 @@ class UserPreferencesDataSource @Inject constructor(private val userPreferences:
                     Theme.DARK -> ThemeProto.THEME_DARK
                 }
             }
+        }
+    }
+
+    suspend fun updateConfigApplied(isConfigApplied: Boolean) {
+        userPreferences.updateData {
+            it.copy { this.isConfigApplied = isConfigApplied }
         }
     }
 }

@@ -33,15 +33,9 @@ interface AppSettingsDao {
     @Delete
     suspend fun deleteAppSettingEntity(entity: AppSettingEntity)
 
-    @Query("SELECT * FROM AppSettingEntity WHERE componentName = :componentName")
-    fun getAppSettingEntitiesFlowByComponentName(componentName: String): Flow<List<AppSettingEntity>>
-
     @Query("SELECT * FROM AppSettingEntity")
     fun getAppSettingEntitiesFlow(): Flow<List<AppSettingEntity>>
 
     @Upsert
     suspend fun upsertAppSettingEntities(entities: List<AppSettingEntity>)
-
-    @Query("SELECT * FROM AppSettingEntity WHERE componentName = :componentName")
-    suspend fun getAppSettingEntitiesByComponentName(componentName: String): List<AppSettingEntity>
 }

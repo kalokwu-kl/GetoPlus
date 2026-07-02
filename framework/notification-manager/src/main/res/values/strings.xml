@@ -16,6 +16,6 @@
   ~
   -->
 <resources>
-    <string name="geto_notification_channel">Geto Notification Channel</string>
+    <string name="geto_notification_channel">Geto+ Notification Channel</string>
     <string name="revert">Revert</string>
 </resources>

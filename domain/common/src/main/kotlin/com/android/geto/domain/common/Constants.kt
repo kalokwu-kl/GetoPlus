@@ -15,22 +15,6 @@
  *   limitations under the License.
  *
  */
+package com.android.geto.domain.common
 
-plugins {
-    alias(libs.plugins.com.android.geto.library)
-    alias(libs.plugins.com.android.geto.hilt)
-}
-
-android {
-    namespace = "com.android.geto.broadcastreceiver"
-}
-
-dependencies {
-    implementation(libs.androidx.core.ktx)
-    implementation(projects.common)
-    implementation(projects.domain.common)
-    implementation(projects.domain.framework)
-    implementation(projects.domain.repository)
-    implementation(projects.domain.useCase)
-    implementation(projects.framework.notificationManager)
-}
+const val GLOBAL_CONFIG_UID = "GLOBAL"

@@ -37,16 +37,18 @@ class ApplyAppSettingsUseCase @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository,
     private val secureSettingsWrapper: SecureSettingsWrapper,
 ) {
-    suspend operator fun invoke(componentName: String): AppSettingsResult = withContext(defaultDispatcher) {
+    suspend operator fun invoke(): AppSettingsResult = withContext(defaultDispatcher) {
         val appSettings =
-            appSettingsRepository.getAppSettingsByComponentName(componentName = componentName)
+            appSettingsRepository.getAppSettings()
 
         if (appSettings.isEmpty()) return@withContext EmptyAppSettings
 
-        if (appSettings.all { !it.enabled }) return@withContext DisabledAppSettings
+        val enabledAppSettings = appSettings.filter { it.enabled }
+
+        if (enabledAppSettings.isEmpty()) return@withContext DisabledAppSettings
 
         try {
-            if (appSettings.all { appSetting ->
+            if (enabledAppSettings.all { appSetting ->
                     secureSettingsWrapper.canWriteSecureSettings(
                         settingType = appSetting.settingType,
                         key = appSetting.key,

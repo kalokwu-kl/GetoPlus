@@ -1,48 +1,79 @@
 <div align = "center">
 
-<img width="100" src="app/src/main/ic_launcher-playstore.png" alt="Geto" align="center">
+<img width="100" src="app/src/main/ic_launcher-playstore.png" alt="Geto+" align="center">
 
-# Geto
+# Geto+
 
-Apply device settings to your apps
+Toggle system settings from your Quick Settings tile — globally, with one tap.
 
 ![GitHub Release](https://img.shields.io/github/v/release/JackEblan/Geto?style=for-the-badge)
 ![GitHub License](https://img.shields.io/github/license/JackEblan/Geto?style=for-the-badge)
-![F-Droid Version](https://img.shields.io/f-droid/v/com.android.geto?style=for-the-badge)
-![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/JackEblan/Geto/total?style=for-the-badge)
-
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png" alt="Get it on F-Droid" height="80">](https://f-droid.org/en/packages/com.android.geto/)
 
 </div>
 
 About The Project
 ==================
 
-The only reason I created this app is to turn off that damn Developer Options when using a banking
-app. The only annoying thing about it is you have to go to the Settings app. When you turn off that
-switch button, your Developer Options configurations will be reset to default. The good thing is
-that when you modify your settings through its Shared Preferences, you won't lose all your settings
-once the Developer Options is modified. So basically, you have to grant this app
-with `android.permission.WRITE_SECURE_SETTINGS` in order for it to modify your Settings values.
+This is a **fork** of [Geto](https://github.com/JackEblan/Geto) by JackEblan, adapted for a simplified
+workflow. Instead of configuring settings per app, Geto+ provides a **Quick Settings tile** that
+toggles a global configuration with a single tap. Check/uncheck which settings you want to include,
+tap the tile, and done.
 
-> [!IMPORTANT]  
-> Watch the tutorial on [YouTube](https://youtu.be/CJrJyHpVVRM?si=ACrEC0hcPed53RAj)
+Requires `android.permission.WRITE_SECURE_SETTINGS` to modify system settings values.
 
-# Screenshots
+How It Works
+=============
 
-<div style="width:100%; display:flex; justify-content:space-between;">
+1. **Add your settings** via the app — label, key, values for on/off
+2. **Check which ones** you want to include in the toggle
+3. **Pull down Quick Settings** and tap the Geto+ tile to apply — tap again to revert
+4. An ongoing notification shows the current status
 
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width=19% alt="1">](fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width=19% alt="2">](fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width=19% alt="3">](fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width=19% alt="4">](fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" width=19% alt="5">](fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" width=19% alt="6">](fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/7.jpg" width=19% alt="6">](fastlane/metadata/android/en-US/images/phoneScreenshots/7.jpg)
-[<img src="fastlane/metadata/android/en-US/images/phoneScreenshots/8.jpg" width=19% alt="6">](fastlane/metadata/android/en-US/images/phoneScreenshots/8.jpg)
-</div>
+Getting Started
+===============
 
-# License
+### Prerequisites
 
-**Geto** is licensed under the GNU General Public License v3.0. See the [license](LICENSE) for more
+- [Android Studio](https://developer.android.com/studio) (latest stable)
+- Java 17 or 21 (bundled with Android Studio, or via [SDKMAN](https://sdkman.io))
+- Android SDK (installed via Android Studio's SDK Manager)
+
+### Build from source
+
+```bash
+# Clone the repository
+git clone https://github.com/YOUR_USERNAME/Geto
+cd Geto
+
+# Build a debug APK
+./gradlew assembleDebug
+
+# Build a release APK (smaller file size, requires a signing key)
+./gradlew assembleRelease
+```
+
+The debug APK will be at `app/build/outputs/apk/debug/app-debug.apk`.
+
+For a **release build** with smaller file size:
+
+1. Generate a signing key (or use Android Studio's **Build > Generate Signed APK** wizard)
+2. Place `key.properties` in the project root or configure signing in `app/build.gradle.kts`
+3. Run `./gradlew assembleRelease`
+4. The release APK will be at `app/build/outputs/apk/release/app-release.apk`
+
+Release builds use R8 shrinking and resource minification for a smaller APK.
+
+### Install on device
+
+```bash
+# With a connected device or emulator
+./gradlew installDebug
+```
+
+Or open the project in Android Studio and press **Run** (▶).
+
+License
+=======
+
+**Geto+** is licensed under the GNU General Public License v3.0. See the [license](LICENSE) for more
 information.
