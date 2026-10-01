@@ -18,7 +18,6 @@
 package com.android.geto.feature.appsettings
 
 import android.widget.Toast
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -70,7 +69,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.geto.designsystem.component.DialogContainer
 import com.android.geto.designsystem.icon.GetoIcons
@@ -130,7 +129,6 @@ internal fun AppSettingsRoute(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@VisibleForTesting
 @Composable
 internal fun AppSettingsScreen(
     modifier: Modifier = Modifier,
@@ -343,7 +341,6 @@ private fun AppSettingsLaunchedEffects(
                         context = context,
                         notificationId = notificationId,
                         componentName = GLOBAL_CONFIG_UID,
-                        icon = null,
                         contentTitle = appliedNotificationTitle,
                         contentText = appliedNotificationText,
                         ongoing = true,

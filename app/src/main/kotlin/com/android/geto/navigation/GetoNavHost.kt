@@ -18,13 +18,21 @@
 package com.android.geto.navigation
 
 import android.os.Build
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.android.geto.R
@@ -42,13 +50,23 @@ fun GetoNavHost(navController: NavHostController) {
 
     PostNotificationsPermission(snackbarHostState = snackbarHostState)
 
-    NavHost(
-        navController = navController,
-        startDestination = AppSettingsRouteData::class,
-    ) {
-        appSettingsScreen(onSettingsClick = navController::navigateToSettings)
+    Box(modifier = Modifier.fillMaxSize()) {
+        NavHost(
+            navController = navController,
+            startDestination = AppSettingsRouteData::class,
+        ) {
+            appSettingsScreen(onSettingsClick = navController::navigateToSettings)
 
-        settingsScreen(onBackClick = navController::navigateUp)
+            settingsScreen(onBackClick = navController::navigateUp)
+        }
+
+        SnackbarHost(
+            hostState = snackbarHostState,
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .navigationBarsPadding()
+                .padding(horizontal = 16.dp, vertical = 16.dp),
+        )
     }
 }
 

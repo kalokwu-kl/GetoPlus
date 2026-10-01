@@ -24,8 +24,6 @@ import org.gradle.api.plugins.JavaPluginExtension
 import org.gradle.kotlin.dsl.apply
 import org.gradle.kotlin.dsl.assign
 import org.gradle.kotlin.dsl.configure
-import org.gradle.kotlin.dsl.dependencies
-import org.gradle.kotlin.dsl.kotlin
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinJvmProjectExtension
 
@@ -43,10 +41,6 @@ class JvmLibraryConventionPlugin : Plugin<Project> {
                 compilerOptions {
                     jvmTarget = JvmTarget.JVM_11
                 }
-            }
-
-            dependencies {
-                add("implementation", kotlin("stdlib"))
             }
         }
     }

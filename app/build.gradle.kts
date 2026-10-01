@@ -30,8 +30,6 @@ android {
         versionCode = 171
         versionName = "1.17.1"
 
-        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
-
         vectorDrawables {
             useSupportLibrary = true
         }
@@ -78,9 +76,4 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
-
-    androidTestImplementation(libs.androidx.test.core.ktx)
-    androidTestImplementation(libs.androidx.test.runner)
-    androidTestImplementation(libs.androidx.test.rules)
-    androidTestImplementation(libs.androidx.test.ext.junit.ktx)
 }

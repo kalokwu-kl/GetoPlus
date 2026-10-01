@@ -101,7 +101,6 @@ class SystemWideTileService : TileService() {
                             context = this@SystemWideTileService,
                             notificationId = notificationId,
                             componentName = GLOBAL_CONFIG_UID,
-                            icon = null,
                             contentTitle = getString(com.android.geto.feature.appsettings.R.string.applied_notification_title),
                             contentText = getString(com.android.geto.feature.appsettings.R.string.applied_notification_text),
                             ongoing = true,

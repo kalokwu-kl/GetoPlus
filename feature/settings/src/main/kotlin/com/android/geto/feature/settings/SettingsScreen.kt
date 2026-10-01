@@ -21,7 +21,6 @@ import android.Manifest
 import android.content.Intent
 import android.os.Build
 import android.provider.Settings
-import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -59,7 +58,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.geto.designsystem.icon.GetoIcons
 import com.android.geto.domain.model.Theme
@@ -88,7 +87,6 @@ internal fun SettingsRoute(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-@VisibleForTesting
 @Composable
 internal fun SettingsScreen(
     modifier: Modifier = Modifier,
@@ -176,7 +174,6 @@ private fun CategoryTitle(title: String) {
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun ThemeSetting(
     modifier: Modifier = Modifier,

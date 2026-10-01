@@ -23,7 +23,6 @@ import android.app.PendingIntent.FLAG_IMMUTABLE
 import android.app.PendingIntent.FLAG_UPDATE_CURRENT
 import android.content.Context
 import android.content.Intent
-import android.graphics.drawable.Icon
 import androidx.core.app.NotificationCompat
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper.Companion.ACTION_REVERT_SETTINGS
@@ -34,7 +33,6 @@ fun getAppSettingsNotification(
     context: Context,
     notificationId: Int,
     componentName: String,
-    icon: ByteArray?,
     contentTitle: String,
     contentText: String,
     ongoing: Boolean = false,
@@ -57,10 +55,6 @@ fun getAppSettingsNotification(
         AndroidNotificationManagerWrapper.NOTIFICATION_CHANNEL_ID,
     ).apply {
         setSmallIcon(com.android.geto.framework.notificationmanager.R.drawable.baseline_settings_24)
-
-        icon?.let {
-            setLargeIcon(Icon.createWithData(icon, 0, it.size))
-        }
 
         setContentTitle(contentTitle)
         setContentText(contentText)

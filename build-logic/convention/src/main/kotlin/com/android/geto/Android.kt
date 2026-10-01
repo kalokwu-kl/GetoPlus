@@ -31,7 +31,7 @@ internal fun Project.configureAndroid(
     commonExtension: CommonExtension<*, *, *, *, *, *>,
 ) {
     commonExtension.apply {
-        compileSdk = 34
+        compileSdk = 36
 
         defaultConfig {
             minSdk = 24
@@ -81,8 +81,5 @@ internal fun Project.configureCompose(commonExtension: CommonExtension<*, *, *, 
         project.providers.gradleProperty("enableComposeCompilerReports").onlyIfTrue()
             .relativeToRootProject("compose-reports")
             .let(reportsDestination::set)
-
-        stabilityConfigurationFile =
-            rootProject.layout.projectDirectory.file("compose_compiler_config.conf")
     }
 }
