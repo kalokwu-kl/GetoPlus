@@ -48,8 +48,7 @@ import androidx.navigation.compose.NavHost
 import com.android.geto.R
 import com.android.geto.feature.appsettings.navigation.AppSettingsRouteData
 import com.android.geto.feature.appsettings.navigation.appSettingsScreen
-import com.android.geto.feature.settings.navigation.navigateToSettings
-import com.android.geto.feature.settings.navigation.settingsScreen
+import com.android.geto.feature.settings.SettingsRoute
 
 @Composable
 fun GetoNavHost(navController: NavHostController) {
@@ -57,24 +56,29 @@ fun GetoNavHost(navController: NavHostController) {
 
     PostNotificationsPermission(snackbarHostState = snackbarHostState)
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        NavHost(
-            navController = navController,
-            startDestination = AppSettingsRouteData::class,
-        ) {
-            appSettingsScreen(onSettingsClick = navController::navigateToSettings)
+    GetoSettingsDrawer(
+        panel = { close ->
+            SettingsRoute(onBackClick = close)
+        },
+        content = { open ->
+            Box(modifier = Modifier.fillMaxSize()) {
+                NavHost(
+                    navController = navController,
+                    startDestination = AppSettingsRouteData::class,
+                ) {
+                    appSettingsScreen(onSettingsClick = open)
+                }
 
-            settingsScreen(onBackClick = navController::navigateUp)
-        }
-
-        SnackbarHost(
-            hostState = snackbarHostState,
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-                .navigationBarsPadding()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
-        )
-    }
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .navigationBarsPadding()
+                        .padding(horizontal = 16.dp, vertical = 16.dp),
+                )
+            }
+        },
+    )
 }
 
 @Composable

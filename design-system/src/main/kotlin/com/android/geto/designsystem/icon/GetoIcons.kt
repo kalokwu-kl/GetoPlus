@@ -28,14 +28,13 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsSuggest
 
 object GetoIcons {
-    val Settings = Icons.Default.Settings
     val Android = Icons.Default.Android
     val Back = Icons.AutoMirrored.Filled.ArrowBack
     val Refresh = Icons.Default.Refresh
@@ -48,6 +47,7 @@ object GetoIcons {
     val Error = Icons.Default.Error
     val Info = Icons.Default.Info
     val Notifications = Icons.Default.Notifications
+    val Menu = Icons.Default.Menu
     val Search = Icons.Default.Search
     val ArrowDropDown = Icons.Default.ArrowDropDown
 }

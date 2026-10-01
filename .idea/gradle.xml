@@ -23,10 +23,8 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/broadcast-receiver" />
             <option value="$PROJECT_DIR$/build-logic" />
             <option value="$PROJECT_DIR$/build-logic/convention" />
-            <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/data" />
             <option value="$PROJECT_DIR$/data/datastore" />
             <option value="$PROJECT_DIR$/data/datastore-proto" />
@@ -46,7 +44,6 @@
             <option value="$PROJECT_DIR$/framework/asset-manager" />
             <option value="$PROJECT_DIR$/framework/notification-manager" />
             <option value="$PROJECT_DIR$/framework/secure-settings" />
-            <option value="$PROJECT_DIR$/ui" />
           </set>
         </option>
       </GradleProjectSettings>

@@ -18,6 +18,7 @@
 package com.android.geto.feature.appsettings
 
 import android.widget.Toast
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyItemScope
@@ -62,6 +64,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
@@ -196,7 +199,17 @@ internal fun AppSettingsScreen(
         topBar = {
             TopAppBar(
                 title = {
-                    Text(text = stringResource(id = R.string.geto_title))
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(
+                            painter = painterResource(com.android.geto.designsystem.R.drawable.geto_logo),
+                            contentDescription = null,
+                            modifier = Modifier.size(40.dp),
+                        )
+
+                        Spacer(modifier = Modifier.width(12.dp))
+
+                        Text(text = stringResource(id = R.string.geto_title))
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surfaceContainer,
@@ -205,7 +218,7 @@ internal fun AppSettingsScreen(
                 actions = {
                     IconButton(onClick = onSettingsClick) {
                         Icon(
-                            imageVector = GetoIcons.Settings,
+                            imageVector = GetoIcons.Menu,
                             contentDescription = null,
                         )
                     }

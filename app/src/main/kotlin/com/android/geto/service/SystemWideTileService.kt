@@ -98,6 +98,8 @@ class SystemWideTileService : TileService() {
                 }
 
                 result == AppSettingsResult.NoPermission -> showToast(result, mode)
+
+                result == AppSettingsResult.EmptyAppSettings || result == AppSettingsResult.DisabledAppSettings -> showToast(result, mode)
             }
         }
     }

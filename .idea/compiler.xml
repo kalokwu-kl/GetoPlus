@@ -3,6 +3,8 @@
   <component name="CompilerConfiguration">
     <bytecodeTargetLevel target="11">
       <module name="Geto.benchmarks" target="21" />
+      <module name="Geto.broadcast-receiver" target="17" />
+      <module name="Geto.common" target="17" />
       <module name="Geto.core.broadcast" target="17" />
       <module name="Geto.core.broadcastreceiver" target="17" />
       <module name="Geto.core.build-version" target="17" />
@@ -60,6 +62,7 @@
       <module name="Geto.screenshot-testing" target="21" />
       <module name="Geto.service" target="21" />
       <module name="Geto.shizuku.package-manager" target="21" />
+      <module name="Geto.ui" target="17" />
       <module name="Geto.ui-test-hilt-manifest" target="17" />
       <module name="Geto.ui-test-hilt-manifest.main" target="17" />
       <module name="Geto.ui-test-hilt-manifest.test" target="17" />
