@@ -19,6 +19,5 @@ package com.android.geto.domain.model
 
 data class UserData(
     val theme: Theme,
-    val dynamicTheme: Boolean,
     val isConfigApplied: Boolean,
 )

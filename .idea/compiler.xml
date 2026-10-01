@@ -37,6 +37,8 @@
       <module name="Geto.domain.foreground-service" target="21" />
       <module name="Geto.domain.service" target="21" />
       <module name="Geto.feature.applist" target="17" />
+      <module name="Geto.feature.apps" target="21" />
+      <module name="Geto.feature.home" target="21" />
       <module name="Geto.feature.permission" target="21" />
       <module name="Geto.feature.securesettingslist" target="17" />
       <module name="Geto.feature.service" target="21" />
@@ -47,8 +49,12 @@
       <module name="Geto.framework.broadcast-receiver" target="21" />
       <module name="Geto.framework.build-version" target="17" />
       <module name="Geto.framework.clipboard-manager" target="21" />
+      <module name="Geto.framework.drawable" target="21" />
+      <module name="Geto.framework.launcher-apps" target="21" />
+      <module name="Geto.framework.package-manager" target="21" />
       <module name="Geto.framework.package-manager-test" target="21" />
       <module name="Geto.framework.shizuku" target="21" />
+      <module name="Geto.framework.shortcut-manager" target="21" />
       <module name="Geto.framework.usage-stats-manager" target="21" />
       <module name="Geto.roborazzi" target="21" />
       <module name="Geto.screenshot-testing" target="21" />

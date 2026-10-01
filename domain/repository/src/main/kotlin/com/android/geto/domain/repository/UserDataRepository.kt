@@ -27,7 +27,5 @@ interface UserDataRepository {
 
     suspend fun updateTheme(theme: Theme)
 
-    suspend fun updateDynamicTheme(dynamicTheme: Boolean)
-
     suspend fun updateConfigApplied(isConfigApplied: Boolean)
 }

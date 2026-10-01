@@ -31,7 +31,7 @@ import androidx.navigation.compose.rememberNavController
 import com.android.geto.designsystem.theme.GetoTheme
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper
 import com.android.geto.navigation.GetoNavHost
-import com.android.geto.ui.local.LocalNotificationManager
+import com.android.geto.designsystem.local.LocalNotificationManager
 import dagger.hilt.android.AndroidEntryPoint
 import javax.inject.Inject
 
@@ -62,7 +62,6 @@ class MainActivity : ComponentActivity() {
                     is MainActivityUiState.Success -> {
                         GetoTheme(
                             theme = uiState.userData.theme,
-                            dynamicTheme = uiState.userData.dynamicTheme,
                         ) {
                             Surface {
                                 GetoNavHost(navController = navController)

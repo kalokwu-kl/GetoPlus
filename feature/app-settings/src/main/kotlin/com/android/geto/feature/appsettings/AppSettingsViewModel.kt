@@ -33,6 +33,7 @@ import com.android.geto.domain.usecase.ApplyAppSettingsUseCase
 import com.android.geto.domain.usecase.GetSecureSettingsByNameUseCase
 import com.android.geto.domain.usecase.RevertAppSettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -57,6 +58,8 @@ class AppSettingsViewModel @Inject constructor(
 
     private var _secureSettings = MutableStateFlow<List<SecureSetting>>(emptyList())
     val secureSettings = _secureSettings.asStateFlow()
+
+    private var getSecureSettingsJob: Job? = null
 
     private val _addAppSettingsResult = MutableStateFlow<AddAppSettingResult?>(null)
     val addAppSettingsResult = _addAppSettingsResult.asStateFlow()
@@ -136,7 +139,8 @@ class AppSettingsViewModel @Inject constructor(
     }
 
     fun getSecureSettingsByName(settingType: SettingType, text: String) {
-        viewModelScope.launch {
+        getSecureSettingsJob?.cancel()
+        getSecureSettingsJob = viewModelScope.launch {
             _secureSettings.update {
                 getSecureSettingsByNameUseCase(
                     settingType = settingType,

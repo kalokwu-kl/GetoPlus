@@ -83,7 +83,6 @@ internal fun SettingsRoute(
         modifier = modifier,
         settingsUiState = settingsUiState,
         onUpdateTheme = viewModel::updateTheme,
-        onUpdateDynamicTheme = viewModel::updateDynamicTheme,
         onBackClick = onBackClick,
     )
 }
@@ -95,7 +94,6 @@ internal fun SettingsScreen(
     modifier: Modifier = Modifier,
     settingsUiState: SettingsUiState,
     onUpdateTheme: (Theme) -> Unit,
-    onUpdateDynamicTheme: (Boolean) -> Unit,
     onBackClick: () -> Unit,
 ) {
     Scaffold(
@@ -133,7 +131,6 @@ internal fun SettingsScreen(
                 is SettingsUiState.Success -> {
                     SuccessState(
                         userData = settingsUiState.userData,
-                        onUpdateDynamicTheme = onUpdateDynamicTheme,
                         onUpdateTheme = onUpdateTheme,
                     )
                 }
@@ -146,7 +143,6 @@ internal fun SettingsScreen(
 private fun SuccessState(
     modifier: Modifier = Modifier,
     userData: UserData,
-    onUpdateDynamicTheme: (Boolean) -> Unit,
     onUpdateTheme: (Theme) -> Unit,
 ) {
     Column(modifier = modifier.fillMaxSize()) {
@@ -308,8 +304,12 @@ private fun WriteSecurePermissionSetting() {
 
     var isGranted by remember { mutableStateOf<Boolean?>(null) }
 
-    LaunchedEffect(Unit) {
-        isGranted = withContext(Dispatchers.IO) {
+    var showInfoDialog by remember { mutableStateOf(false) }
+
+    var permissionCheckTrigger by remember { mutableStateOf(0) }
+
+    LaunchedEffect(permissionCheckTrigger) {
+        val result = withContext(Dispatchers.IO) {
             try {
                 Settings.Global.putString(
                     context.contentResolver,
@@ -321,12 +321,16 @@ private fun WriteSecurePermissionSetting() {
                 false
             }
         }
+        isGranted = result
+        if (result) {
+            showInfoDialog = false
+        }
     }
-
-    var showInfoDialog by remember { mutableStateOf(false) }
 
     if (showInfoDialog) {
         WriteSecureSettingsDialog(
+            showRecheckButton = isGranted == false,
+            onRecheckClick = { permissionCheckTrigger++ },
             onDismissRequest = { showInfoDialog = false },
         )
     }

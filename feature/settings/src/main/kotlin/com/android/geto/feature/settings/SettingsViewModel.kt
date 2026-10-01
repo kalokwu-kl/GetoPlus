@@ -43,10 +43,4 @@ class SettingsViewModel @Inject constructor(
             userDataRepository.updateTheme(theme = theme)
         }
     }
-
-    fun updateDynamicTheme(dynamicTheme: Boolean) {
-        viewModelScope.launch {
-            userDataRepository.updateDynamicTheme(dynamicTheme = dynamicTheme)
-        }
-    }
 }

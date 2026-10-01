@@ -22,5 +22,5 @@
     <string name="please_grant_notifications_permission">Please grant notifications permission</string>
     <string name="allow">Allow</string>
     <string name="service">Service</string>
-    <string name="system_wide_config">Geto+ Config</string>
+    <string name="system_wide_config">Geto+ Settings</string>
 </resources>

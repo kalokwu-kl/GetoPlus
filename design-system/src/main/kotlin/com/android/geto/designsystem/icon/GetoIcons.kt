@@ -24,12 +24,15 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Android
 import androidx.compose.material.icons.filled.AppShortcut
 import androidx.compose.material.icons.filled.Apps
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.SettingsSuggest
 
@@ -45,7 +48,10 @@ object GetoIcons {
     val PlayArrow = Icons.Filled.PlayArrow
     val Edit = Icons.Default.Edit
     val CheckCircle = Icons.Default.CheckCircle
+    val Clear = Icons.Default.Clear
     val Error = Icons.Default.Error
     val Info = Icons.Default.Info
     val Notifications = Icons.Default.Notifications
+    val Search = Icons.Default.Search
+    val ArrowDropDown = Icons.Default.ArrowDropDown
 }

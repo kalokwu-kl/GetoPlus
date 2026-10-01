@@ -19,14 +19,9 @@ package com.android.geto.data.room.di
 
 import android.content.Context
 import androidx.room.Room
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
 import com.android.geto.data.room.AppDatabase
-import com.android.geto.data.room.migration.Migration1To2
-import com.android.geto.data.room.migration.Migration2To3
-import com.android.geto.data.room.migration.Migration3To4
-import com.android.geto.data.room.migration.Migration4To5
-import com.android.geto.data.room.migration.Migration5To6
-import com.android.geto.data.room.migration.Migration6To7
-import com.android.geto.data.room.migration.Migration7To8
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -37,19 +32,65 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 internal object RoomModule {
+
+    private val MIGRATION_1_2 = object : Migration(1, 2) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `AppSettingEntity_new` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `enabled` INTEGER NOT NULL,
+                    `settingType` TEXT NOT NULL,
+                    `componentName` TEXT NOT NULL,
+                    `label` TEXT NOT NULL,
+                    `key` TEXT NOT NULL,
+                    `valueOnLaunch` TEXT,
+                    `valueOnRevert` TEXT
+                )
+                """.trimIndent(),
+            )
+            db.execSQL(
+                "INSERT INTO `AppSettingEntity_new` " +
+                    "(`id`, `enabled`, `settingType`, `componentName`, `label`, `key`, `valueOnLaunch`, `valueOnRevert`) " +
+                    "SELECT `id`, `enabled`, `settingType`, `componentName`, `label`, `key`, `valueOnLaunch`, `valueOnRevert` FROM `AppSettingEntity`",
+            )
+            db.execSQL("DROP TABLE `AppSettingEntity`")
+            db.execSQL("ALTER TABLE `AppSettingEntity_new` RENAME TO `AppSettingEntity`")
+        }
+    }
+
+    private val MIGRATION_2_3 = object : Migration(2, 3) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+                CREATE TABLE IF NOT EXISTS `AppSettingEntity_new` (
+                    `id` INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                    `enabled` INTEGER NOT NULL,
+                    `settingType` TEXT NOT NULL,
+                    `componentName` TEXT NOT NULL,
+                    `label` TEXT NOT NULL,
+                    `key` TEXT NOT NULL,
+                    `valueOnLaunch` TEXT NOT NULL,
+                    `valueOnRevert` TEXT NOT NULL
+                )
+                """.trimIndent(),
+            )
+            db.execSQL(
+                "INSERT INTO `AppSettingEntity_new` " +
+                    "(`id`, `enabled`, `settingType`, `componentName`, `label`, `key`, `valueOnLaunch`, `valueOnRevert`) " +
+                    "SELECT `id`, `enabled`, `settingType`, `componentName`, `label`, `key`, " +
+                    "COALESCE(`valueOnLaunch`, ''), COALESCE(`valueOnRevert`, '') FROM `AppSettingEntity`",
+            )
+            db.execSQL("DROP TABLE `AppSettingEntity`")
+            db.execSQL("ALTER TABLE `AppSettingEntity_new` RENAME TO `AppSettingEntity`")
+        }
+    }
+
     @Singleton
     @Provides
     fun appDatabase(@ApplicationContext context: Context): AppDatabase = Room.databaseBuilder(
         context,
         AppDatabase::class.java,
         AppDatabase.DATABASE_NAME,
-    ).addMigrations(
-        Migration1To2(),
-        Migration2To3(),
-        Migration3To4(),
-        Migration4To5(),
-        Migration5To6(),
-        Migration6To7(),
-        Migration7To8(),
-    ).build()
+    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3).build()
 }

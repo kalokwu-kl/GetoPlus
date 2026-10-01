@@ -20,6 +20,7 @@ package com.android.geto.service
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.widget.Toast
+import com.android.geto.R
 import com.android.geto.domain.common.GLOBAL_CONFIG_UID
 import com.android.geto.domain.model.AppSettingsResult
 import com.android.geto.domain.repository.UserDataRepository
@@ -55,6 +56,9 @@ class SystemWideTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
+        qsTile.label = getString(R.string.system_wide_config)
+        qsTile.contentDescription = getString(R.string.system_wide_config)
+        qsTile.updateTile()
         serviceScope.launch {
             userDataRepository.userData.collectLatest { userData ->
                 qsTile.state = if (userData.isConfigApplied) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
@@ -79,6 +83,12 @@ class SystemWideTileService : TileService() {
                         com.android.geto.feature.appsettings.R.string.revert_success,
                         Toast.LENGTH_SHORT
                     ).show()
+                } else if (result == AppSettingsResult.NoPermission) {
+                    Toast.makeText(
+                        this@SystemWideTileService,
+                        com.android.geto.feature.appsettings.R.string.required_permission_not_granted,
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             } else {
                 val result = applyAppSettingsUseCase()
@@ -92,14 +102,20 @@ class SystemWideTileService : TileService() {
                             notificationId = notificationId,
                             componentName = GLOBAL_CONFIG_UID,
                             icon = null,
-                            contentTitle = getString(com.android.geto.feature.appsettings.R.string.geto_settings),
-                            contentText = getString(com.android.geto.feature.appsettings.R.string.apply_success),
+                            contentTitle = getString(com.android.geto.feature.appsettings.R.string.applied_notification_title),
+                            contentText = getString(com.android.geto.feature.appsettings.R.string.applied_notification_text),
                             ongoing = true,
                         )
                     )
                     Toast.makeText(
                         this@SystemWideTileService,
                         com.android.geto.feature.appsettings.R.string.apply_success,
+                        Toast.LENGTH_SHORT
+                    ).show()
+                } else if (result == AppSettingsResult.NoPermission) {
+                    Toast.makeText(
+                        this@SystemWideTileService,
+                        com.android.geto.feature.appsettings.R.string.required_permission_not_granted,
                         Toast.LENGTH_SHORT
                     ).show()
                 }

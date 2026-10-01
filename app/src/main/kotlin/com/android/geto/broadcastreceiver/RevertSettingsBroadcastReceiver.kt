@@ -20,6 +20,7 @@ package com.android.geto.broadcastreceiver
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import com.android.geto.common.ApplicationScope
 import com.android.geto.domain.model.AppSettingsResult
 import com.android.geto.domain.repository.UserDataRepository
@@ -28,7 +29,9 @@ import com.android.geto.framework.notificationmanager.AndroidNotificationManager
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper.Companion.NOTIFICATION_EXTRA_NOTIFICATION_ID
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -50,12 +53,33 @@ class RevertSettingsBroadcastReceiver @Inject constructor() : BroadcastReceiver(
     override fun onReceive(context: Context?, intent: Intent?) {
         val notificationId = intent?.extras?.getInt(NOTIFICATION_EXTRA_NOTIFICATION_ID) ?: return
 
+        val appContext = context?.applicationContext
+
         appScope.launch {
             val result = revertAppSettingsUseCase()
 
             if (result == AppSettingsResult.Success) {
                 userDataRepository.updateConfigApplied(false)
                 notificationManagerWrapper.cancel(notificationId)
+                withContext(Dispatchers.Main) {
+                    appContext?.let {
+                        Toast.makeText(
+                            it,
+                            com.android.geto.feature.appsettings.R.string.revert_success,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                }
+            } else if (result == AppSettingsResult.NoPermission) {
+                withContext(Dispatchers.Main) {
+                    appContext?.let {
+                        Toast.makeText(
+                            it,
+                            com.android.geto.feature.appsettings.R.string.required_permission_not_granted,
+                            Toast.LENGTH_SHORT,
+                        ).show()
+                    }
+                }
             }
         }
     }

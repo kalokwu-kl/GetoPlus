@@ -15,24 +15,10 @@
  *   limitations under the License.
  *
  */
+package com.android.geto.common
 
-plugins {
-    alias(libs.plugins.com.android.geto.library)
-    alias(libs.plugins.com.android.geto.libraryCompose)
-}
+import javax.inject.Qualifier
 
-android {
-    namespace = "com.android.geto.ui"
-}
-
-dependencies {
-    api(projects.framework.notificationManager)
-
-    implementation(projects.designSystem)
-    implementation(projects.domain.common)
-    implementation(projects.domain.framework)
-    implementation(projects.domain.model)
-
-    implementation(libs.androidx.activity.compose)
-    implementation(libs.androidx.activity.ktx)
-}
+@Retention(AnnotationRetention.RUNTIME)
+@Qualifier
+annotation class ApplicationScope

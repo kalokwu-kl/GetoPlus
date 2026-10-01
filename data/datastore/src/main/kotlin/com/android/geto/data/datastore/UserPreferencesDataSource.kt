@@ -39,15 +39,8 @@ class UserPreferencesDataSource @Inject constructor(private val userPreferences:
                 ThemeProto.THEME_LIGHT -> Theme.LIGHT
                 ThemeProto.THEME_DARK -> Theme.DARK
             },
-            dynamicTheme = it.dynamicTheme,
             isConfigApplied = it.isConfigApplied,
         )
-    }
-
-    suspend fun updateDynamicColor(dynamicTheme: Boolean) {
-        userPreferences.updateData {
-            it.copy { this.dynamicTheme = dynamicTheme }
-        }
     }
 
     suspend fun updateTheme(theme: Theme) {

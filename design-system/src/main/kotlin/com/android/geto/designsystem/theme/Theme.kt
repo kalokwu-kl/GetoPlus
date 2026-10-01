@@ -17,20 +17,14 @@
  */
 package com.android.geto.designsystem.theme
 
-import android.os.Build
-import androidx.annotation.ChecksSdkIntAtLeast
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
-import androidx.compose.material3.dynamicDarkColorScheme
-import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import com.android.geto.domain.model.Theme
 
 private val LightGreenColorScheme = lightColorScheme(
@@ -112,18 +106,9 @@ private val DarkGreenColorScheme = darkColorScheme(
 @Composable
 fun GetoTheme(
     theme: Theme,
-    dynamicTheme: Boolean,
     content: @Composable () -> Unit,
 ) {
-    val colorScheme = if (supportsDynamicTheming() && dynamicTheme) {
-        getDynamicColorScheme(
-            theme = theme,
-        )
-    } else {
-        getGreenColorScheme(
-            theme = theme,
-        )
-    }
+    val colorScheme = getGreenColorScheme(theme = theme)
 
     CompositionLocalProvider {
         MaterialTheme(
@@ -132,9 +117,6 @@ fun GetoTheme(
         )
     }
 }
-
-@ChecksSdkIntAtLeast(api = Build.VERSION_CODES.S)
-fun supportsDynamicTheming() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.S
 
 @Composable
 private fun getGreenColorScheme(theme: Theme): ColorScheme {
@@ -149,34 +131,6 @@ private fun getGreenColorScheme(theme: Theme): ColorScheme {
 
         Theme.DARK -> {
             DarkGreenColorScheme
-        }
-    }
-}
-
-@RequiresApi(Build.VERSION_CODES.S)
-@Composable
-private fun getDynamicColorScheme(theme: Theme): ColorScheme {
-    val context = LocalContext.current
-
-    return when (theme) {
-        Theme.FOLLOW_SYSTEM -> {
-            if (isSystemInDarkTheme()) {
-                dynamicDarkColorScheme(context)
-            } else {
-                dynamicLightColorScheme(
-                    context,
-                )
-            }
-        }
-
-        Theme.LIGHT -> {
-            dynamicLightColorScheme(
-                context,
-            )
-        }
-
-        Theme.DARK -> {
-            dynamicDarkColorScheme(context)
         }
     }
 }

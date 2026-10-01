@@ -28,10 +28,13 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Button
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.android.geto.designsystem.component.DialogContainer
 import com.android.geto.feature.appsettings.R
@@ -39,8 +42,12 @@ import com.android.geto.feature.appsettings.R
 @Composable
 fun WriteSecureSettingsDialog(
     modifier: Modifier = Modifier,
+    showRecheckButton: Boolean = false,
+    onRecheckClick: () -> Unit = {},
     onDismissRequest: () -> Unit,
 ) {
+    val context = LocalContext.current
+
     DialogContainer(
         modifier = modifier.verticalScroll(rememberScrollState()),
         content = {
@@ -53,6 +60,8 @@ fun WriteSecureSettingsDialog(
                     modifier = Modifier.padding(10.dp),
                     text = stringResource(R.string.permission),
                     style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
                 )
 
                 Text(
@@ -63,7 +72,7 @@ fun WriteSecureSettingsDialog(
                 SelectionContainer {
                     Text(
                         modifier = Modifier.padding(15.dp),
-                        text = "pm grant com.android.geto android.permission.WRITE_SECURE_SETTINGS",
+                        text = stringResource(R.string.secure_settings_adb_command, context.packageName),
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontStyle = FontStyle.Italic,
                         ),
@@ -74,8 +83,13 @@ fun WriteSecureSettingsDialog(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.End,
                 ) {
+                    if (showRecheckButton) {
+                        TextButton(onClick = onRecheckClick) {
+                            Text(text = stringResource(R.string.recheck))
+                        }
+                    }
                     Button(onClick = onDismissRequest) {
-                        Text(text = "Okay")
+                        Text(text = stringResource(R.string.okay))
                     }
                 }
             }

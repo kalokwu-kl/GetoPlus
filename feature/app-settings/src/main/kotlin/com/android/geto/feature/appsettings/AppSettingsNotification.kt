@@ -25,7 +25,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.drawable.Icon
 import androidx.core.app.NotificationCompat
-import com.android.geto.broadcastreceiver.RevertSettingsBroadcastReceiver
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper.Companion.ACTION_REVERT_SETTINGS
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper.Companion.NOTIFICATION_EXTRA_COMPONENT_NAME
@@ -40,8 +39,8 @@ fun getAppSettingsNotification(
     contentText: String,
     ongoing: Boolean = false,
 ): Notification {
-    val revertIntent = Intent(context, RevertSettingsBroadcastReceiver::class.java).apply {
-        action = ACTION_REVERT_SETTINGS
+    val revertIntent = Intent(ACTION_REVERT_SETTINGS).apply {
+        setPackage(context.packageName)
         putExtra(NOTIFICATION_EXTRA_COMPONENT_NAME, componentName)
         putExtra(NOTIFICATION_EXTRA_NOTIFICATION_ID, notificationId)
     }
@@ -65,6 +64,8 @@ fun getAppSettingsNotification(
 
         setContentTitle(contentTitle)
         setContentText(contentText)
+        setContentIntent(revertPendingIntent)
+        setAutoCancel(true)
         setPriority(NotificationCompat.PRIORITY_DEFAULT)
         setOngoing(ongoing)
         addAction(

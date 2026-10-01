@@ -17,48 +17,15 @@
  */
 package com.android.geto.data.room
 
-import androidx.room.AutoMigration
 import androidx.room.Database
 import androidx.room.RoomDatabase
 import com.android.geto.data.room.dao.AppSettingsDao
-import com.android.geto.data.room.migration.AutoMigrationSpec1To2
-import com.android.geto.data.room.migration.AutoMigrationSpec4To5
-import com.android.geto.data.room.migration.AutoMigrationSpec5To6
-import com.android.geto.data.room.migration.AutoMigrationSpec6To7
-import com.android.geto.data.room.migration.AutoMigrationSpec8To9
 import com.android.geto.data.room.model.AppSettingEntity
 
 @Database(
     entities = [AppSettingEntity::class],
-    version = 9,
-    autoMigrations = [
-        AutoMigration(
-            from = 1,
-            to = 2,
-            spec = AutoMigrationSpec1To2::class,
-        ),
-        AutoMigration(
-            from = 4,
-            to = 5,
-            spec = AutoMigrationSpec4To5::class,
-        ),
-        AutoMigration(
-            from = 5,
-            to = 6,
-            spec = AutoMigrationSpec5To6::class,
-        ),
-        AutoMigration(
-            from = 6,
-            to = 7,
-            spec = AutoMigrationSpec6To7::class,
-        ),
-        AutoMigration(
-            from = 8,
-            to = 9,
-            spec = AutoMigrationSpec8To9::class,
-        ),
-    ],
-    exportSchema = true,
+    version = 3,
+    exportSchema = false,
 )
 internal abstract class AppDatabase : RoomDatabase() {
 

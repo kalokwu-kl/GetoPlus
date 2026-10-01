@@ -64,7 +64,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.geto.designsystem.component.DialogContainer
@@ -78,8 +83,7 @@ import com.android.geto.domain.model.SecureSetting
 import com.android.geto.domain.model.SettingType
 import com.android.geto.feature.appsettings.dialog.AppSettingDialog
 import com.android.geto.feature.appsettings.dialog.TemplateDialog
-import com.android.geto.feature.appsettings.dialog.WriteSecureSettingsDialog
-import com.android.geto.ui.local.LocalNotificationManager
+import com.android.geto.designsystem.local.LocalNotificationManager
 
 @Composable
 internal fun AppSettingsRoute(
@@ -154,8 +158,6 @@ internal fun AppSettingsScreen(
 
     var showTemplateDialog by remember { mutableStateOf(false) }
 
-    var showWriteSecureSettingsDialog by remember { mutableStateOf(false) }
-
     var showQuickSettingsTipDialog by remember { mutableStateOf(false) }
 
     AppSettingsLaunchedEffects(
@@ -166,9 +168,7 @@ internal fun AppSettingsScreen(
         onResetApplyAppSettingsResult = onResetApplyAppSettingsResult,
         onResetRevertAppSettingsResult = onResetRevertAppSettingsResult,
         onResetAddAppSettingResult = onResetAddAppSettingResult,
-        onShowWriteSecureSettingsDialog = {
-            showWriteSecureSettingsDialog = true
-        },
+        onNoPermission = onSettingsClick,
     )
 
     AppSettingsDialogs(
@@ -177,7 +177,6 @@ internal fun AppSettingsScreen(
         showAppSettingDialog = showAppSettingDialog || editingAppSetting != null,
         editingAppSetting = editingAppSetting,
         showTemplateDialog = showTemplateDialog,
-        showWriteSecureSettingsDialog = showWriteSecureSettingsDialog,
         onAddAppSetting = onAddAppSetting,
         onUpdateAppSetting = onUpdateAppSetting,
         onDismissAppSettingDialog = {
@@ -186,9 +185,6 @@ internal fun AppSettingsScreen(
         },
         onDismissTemplateDialog = {
             showTemplateDialog = false
-        },
-        onDismissWriteSecureSettingsDialog = {
-            showWriteSecureSettingsDialog = false
         },
         onGetSecureSettingsByName = onGetSecureSettingsByName,
     )
@@ -283,7 +279,7 @@ private fun AppSettingsLaunchedEffects(
     onResetApplyAppSettingsResult: () -> Unit,
     onResetRevertAppSettingsResult: () -> Unit,
     onResetAddAppSettingResult: () -> Unit,
-    onShowWriteSecureSettingsDialog: () -> Unit,
+    onNoPermission: () -> Unit,
 ) {
     val context = LocalContext.current
 
@@ -293,9 +289,11 @@ private fun AppSettingsLaunchedEffects(
 
     val emptyAppSettingsList = stringResource(id = R.string.empty_app_settings_list)
 
-    val getoSettings = stringResource(id = R.string.geto_settings)
-
     val applySuccess = stringResource(id = R.string.apply_success)
+
+    val appliedNotificationTitle = stringResource(R.string.applied_notification_title)
+
+    val appliedNotificationText = stringResource(R.string.applied_notification_text)
 
     val applyFailure = stringResource(id = R.string.apply_failure)
 
@@ -308,6 +306,8 @@ private fun AppSettingsLaunchedEffects(
     val appSettingAddSuccess = stringResource(R.string.app_setting_added_successfully)
 
     val appSettingAddFailed = stringResource(R.string.app_setting_already_exists)
+
+    val requiredPermissionNotGranted = stringResource(R.string.required_permission_not_granted)
 
     LaunchedEffect(key1 = applyAppSettingsResult) {
         when (applyAppSettingsResult) {
@@ -324,7 +324,12 @@ private fun AppSettingsLaunchedEffects(
             }
 
             AppSettingsResult.NoPermission -> {
-                onShowWriteSecureSettingsDialog()
+                Toast.makeText(
+                    context,
+                    requiredPermissionNotGranted,
+                    Toast.LENGTH_SHORT,
+                ).show()
+                onNoPermission()
             }
 
             AppSettingsResult.Success -> {
@@ -339,8 +344,8 @@ private fun AppSettingsLaunchedEffects(
                         notificationId = notificationId,
                         componentName = GLOBAL_CONFIG_UID,
                         icon = null,
-                        contentTitle = getoSettings,
-                        contentText = applySuccess,
+                        contentTitle = appliedNotificationTitle,
+                        contentText = appliedNotificationText,
                         ongoing = true,
                     ),
                 )
@@ -373,7 +378,12 @@ private fun AppSettingsLaunchedEffects(
             }
 
             AppSettingsResult.NoPermission -> {
-                onShowWriteSecureSettingsDialog()
+                Toast.makeText(
+                    context,
+                    requiredPermissionNotGranted,
+                    Toast.LENGTH_SHORT,
+                ).show()
+                onNoPermission()
             }
 
             AppSettingsResult.Success -> {
@@ -419,12 +429,10 @@ private fun AppSettingsDialogs(
     showAppSettingDialog: Boolean,
     editingAppSetting: AppSetting? = null,
     showTemplateDialog: Boolean,
-    showWriteSecureSettingsDialog: Boolean,
     onAddAppSetting: (AppSetting) -> Unit,
     onUpdateAppSetting: ((AppSetting) -> Unit)? = null,
     onDismissAppSettingDialog: () -> Unit,
     onDismissTemplateDialog: () -> Unit,
-    onDismissWriteSecureSettingsDialog: () -> Unit,
     onGetSecureSettingsByName: (
         settingType: SettingType,
         text: String,
@@ -449,10 +457,6 @@ private fun AppSettingsDialogs(
             onAddAppSetting = onAddAppSetting,
             onDismissRequest = onDismissTemplateDialog,
         )
-    }
-
-    if (showWriteSecureSettingsDialog) {
-        WriteSecureSettingsDialog(onDismissRequest = onDismissWriteSecureSettingsDialog)
     }
 }
 
@@ -606,15 +610,18 @@ private fun LazyItemScope.AppSettingItem(
                 text = appSetting.label,
             )
         },
-        overlineContent = {
-            Text(
-                text = appSetting.key,
-            )
-        },
         supportingContent = {
-            Text(
-                text = appSetting.settingType.getSettingTypeTitle(),
-            )
+            Column(modifier = Modifier.padding(top = 1.dp)) {
+                Text(
+                    text = appSetting.settingType.getSettingTypeTitle(),
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 15.sp),
+                )
+                Spacer(modifier = Modifier.height(1.dp))
+                Text(
+                    text = appSetting.key,
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            }
         },
         leadingContent = {
             Checkbox(
@@ -641,6 +648,7 @@ private fun LazyItemScope.AppSettingItem(
                     Icon(
                         imageVector = Icons.Default.Delete,
                         contentDescription = null,
+                        tint = MaterialTheme.colorScheme.error,
                     )
                 }
             }
@@ -661,12 +669,33 @@ private fun QuickSettingsTipDialog(onDismissRequest: () -> Unit) {
                 Text(
                     text = stringResource(R.string.quick_settings_tip_title),
                     style = MaterialTheme.typography.titleLarge,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.primary,
                 )
 
                 Spacer(modifier = Modifier.height(12.dp))
 
+                val tipMessage = stringResource(R.string.quick_settings_tip_message)
+
+                val tipBold = stringResource(R.string.quick_settings_tip_bold)
+
+                val tipText = remember(tipMessage, tipBold) {
+                    buildAnnotatedString {
+                        val start = tipMessage.indexOf(tipBold)
+                        if (start >= 0) {
+                            append(tipMessage.take(start))
+                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(tipBold)
+                            }
+                            append(tipMessage.substring(start + tipBold.length))
+                        } else {
+                            append(tipMessage)
+                        }
+                    }
+                }
+
                 Text(
-                    text = stringResource(R.string.quick_settings_tip_message),
+                    text = tipText,
                     style = MaterialTheme.typography.bodyMedium,
                 )
 
@@ -676,7 +705,7 @@ private fun QuickSettingsTipDialog(onDismissRequest: () -> Unit) {
                     modifier = Modifier.align(Alignment.End),
                     onClick = onDismissRequest,
                 ) {
-                    Text(text = "Got it")
+                    Text(text = stringResource(R.string.got_it))
                 }
             }
         },

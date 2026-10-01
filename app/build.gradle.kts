@@ -54,8 +54,6 @@ android {
 }
 
 dependencies {
-    implementation(projects.broadcastReceiver)
-    implementation(projects.common)
     implementation(projects.designSystem)
     implementation(projects.data.repository)
     implementation(projects.domain.common)
@@ -69,7 +67,6 @@ dependencies {
     implementation(projects.framework.assetManager)
     implementation(projects.framework.notificationManager)
     implementation(projects.framework.secureSettings)
-    implementation(projects.ui)
 
     implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.ktx)

@@ -35,8 +35,6 @@ dependencyResolutionManagement {
 enableFeaturePreview("TYPESAFE_PROJECT_ACCESSORS")
 rootProject.name = "Geto"
 include(":app")
-include(":broadcast-receiver")
-include(":common")
 include(":data:datastore")
 include(":data:datastore-proto")
 include(":data:repository")
@@ -52,4 +50,3 @@ include(":feature:settings")
 include(":framework:asset-manager")
 include(":framework:notification-manager")
 include(":framework:secure-settings")
-include(":ui")
