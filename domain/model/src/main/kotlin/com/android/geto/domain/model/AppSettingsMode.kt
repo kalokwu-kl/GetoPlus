@@ -15,21 +15,9 @@
  *   limitations under the License.
  *
  */
+package com.android.geto.domain.model
 
-plugins {
-    alias(libs.plugins.com.android.geto.feature)
-    alias(libs.plugins.com.android.geto.libraryCompose)
-}
-
-android {
-    namespace = "com.android.geto.feature.settings"
-}
-
-dependencies {
-    implementation(projects.domain.common)
-    implementation(projects.domain.repository)
-    implementation(projects.domain.useCase)
-
-    implementation(projects.feature.appSettings)
-    implementation(libs.androidx.activity.compose)
+enum class AppSettingsMode {
+    Apply,
+    Revert,
 }

@@ -19,6 +19,7 @@
 plugins {
     alias(libs.plugins.com.android.geto.library)
     alias(libs.plugins.com.android.geto.hilt)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
@@ -26,7 +27,7 @@ android {
 }
 
 dependencies {
-    implementation(libs.gson)
+    implementation(libs.kotlinx.serialization.json)
     implementation(projects.domain.common)
     implementation(projects.domain.framework)
 }

@@ -19,8 +19,12 @@ package com.android.geto.feature.settings
 
 import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Build
 import android.provider.Settings
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -47,6 +51,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,19 +59,20 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.geto.designsystem.icon.GetoIcons
 import com.android.geto.domain.model.Theme
 import com.android.geto.domain.model.UserData
 import com.android.geto.feature.appsettings.dialog.WriteSecureSettingsDialog
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
@@ -201,22 +207,36 @@ private fun ThemeSetting(
 @Composable
 private fun PermissionTile(
     modifier: Modifier = Modifier,
-    icon: @Composable () -> Unit,
+    icon: ImageVector,
     title: String,
     description: String,
-    statusIcon: @Composable () -> Unit,
-    statusText: String,
-    statusColor: androidx.compose.ui.graphics.Color,
+    granted: Boolean?,
+    grantedText: String,
+    notGrantedText: String,
     onClick: () -> Unit,
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .then(
+                if (granted == null) Modifier else Modifier.clickable(onClick = onClick),
+            )
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
-        icon()
+        if (granted == null) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(24.dp),
+                strokeWidth = 2.dp,
+            )
+        } else {
+            Icon(
+                modifier = Modifier.size(24.dp),
+                imageVector = icon,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+        }
 
         Spacer(modifier = Modifier.width(16.dp))
 
@@ -233,55 +253,66 @@ private fun PermissionTile(
             )
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        if (granted != null) {
+            Spacer(modifier = Modifier.width(12.dp))
 
-        statusIcon()
+            Icon(
+                modifier = Modifier.size(20.dp),
+                imageVector = if (granted) GetoIcons.CheckCircle else GetoIcons.Error,
+                contentDescription = null,
+                tint = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            )
 
-        Spacer(modifier = Modifier.width(4.dp))
+            Spacer(modifier = Modifier.width(4.dp))
 
-        Text(
-            text = statusText,
-            style = MaterialTheme.typography.bodySmall,
-            color = statusColor,
-        )
+            Text(
+                text = if (granted) grantedText else notGrantedText,
+                style = MaterialTheme.typography.bodySmall,
+                color = if (granted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+            )
+        }
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
 private fun NotificationPermissionSetting() {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
 
     val context = LocalContext.current
 
-    val notificationsPermissionState = rememberPermissionState(
-        Manifest.permission.POST_NOTIFICATIONS,
-    )
+    val activity = LocalActivity.current ?: return
 
-    val status = notificationsPermissionState.status
-    val isGranted = status is PermissionStatus.Granted
+    val lifecycle = (activity as? LifecycleOwner)?.lifecycle ?: return
+
+    var isGranted by remember {
+        mutableStateOf(
+            activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED,
+        )
+    }
+
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        isGranted = granted
+    }
+
+    DisposableEffect(activity) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isGranted = activity.checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) == PackageManager.PERMISSION_GRANTED
+            }
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
 
     PermissionTile(
-        icon = {
-            Icon(
-                modifier = Modifier.size(24.dp),
-                imageVector = GetoIcons.Notifications,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        },
+        icon = GetoIcons.Notifications,
         title = stringResource(R.string.notification_permission),
         description = stringResource(R.string.notification_permission_desc),
-        statusIcon = {
-            Icon(
-                modifier = Modifier.size(20.dp),
-                imageVector = if (isGranted) GetoIcons.CheckCircle else GetoIcons.Error,
-                contentDescription = null,
-                tint = if (isGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
-            )
-        },
-        statusText = if (isGranted) stringResource(R.string.notification_allowed) else stringResource(R.string.notification_not_allowed),
-        statusColor = if (isGranted) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.error,
+        granted = isGranted,
+        grantedText = stringResource(R.string.notification_allowed),
+        notGrantedText = stringResource(R.string.notification_not_allowed),
         onClick = {
             if (isGranted) {
                 val intent = Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS).apply {
@@ -289,7 +320,7 @@ private fun NotificationPermissionSetting() {
                 }
                 context.startActivity(intent)
             } else {
-                notificationsPermissionState.launchPermissionRequest()
+                launcher.launch(Manifest.permission.POST_NOTIFICATIONS)
             }
         },
     )
@@ -332,86 +363,15 @@ private fun WriteSecurePermissionSetting() {
         )
     }
 
-    when (isGranted) {
-        true -> {
-            PermissionTile(
-                icon = {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = GetoIcons.Android,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                title = stringResource(R.string.secure_settings_permission),
-                description = stringResource(R.string.secure_settings_desc),
-                statusIcon = {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        imageVector = GetoIcons.CheckCircle,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                    )
-                },
-                statusText = stringResource(R.string.secure_settings_granted),
-                statusColor = MaterialTheme.colorScheme.primary,
-                onClick = { showInfoDialog = true },
-            )
-        }
-        false -> {
-            PermissionTile(
-                icon = {
-                    Icon(
-                        modifier = Modifier.size(24.dp),
-                        imageVector = GetoIcons.Android,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                    )
-                },
-                title = stringResource(R.string.secure_settings_permission),
-                description = stringResource(R.string.secure_settings_desc),
-                statusIcon = {
-                    Icon(
-                        modifier = Modifier.size(20.dp),
-                        imageVector = GetoIcons.Error,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.error,
-                    )
-                },
-                statusText = stringResource(R.string.secure_settings_not_granted),
-                statusColor = MaterialTheme.colorScheme.error,
-                onClick = { showInfoDialog = true },
-            )
-        }
-        null -> {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(24.dp),
-                    strokeWidth = 2.dp,
-                )
-
-                Spacer(modifier = Modifier.width(16.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.secure_settings_permission),
-                        style = MaterialTheme.typography.bodyLarge,
-                    )
-
-                    Text(
-                        text = stringResource(R.string.secure_settings_desc),
-                        style = MaterialTheme.typography.bodySmall.copy(fontStyle = FontStyle.Italic),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f),
-                    )
-                }
-            }
-        }
-    }
+    PermissionTile(
+        icon = GetoIcons.Android,
+        title = stringResource(R.string.secure_settings_permission),
+        description = stringResource(R.string.secure_settings_desc),
+        granted = isGranted,
+        grantedText = stringResource(R.string.secure_settings_granted),
+        notGrantedText = stringResource(R.string.secure_settings_not_granted),
+        onClick = { showInfoDialog = true },
+    )
 }
 
 @Composable

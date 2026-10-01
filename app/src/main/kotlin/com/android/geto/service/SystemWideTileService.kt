@@ -22,11 +22,12 @@ import android.service.quicksettings.TileService
 import android.widget.Toast
 import com.android.geto.R
 import com.android.geto.domain.common.GLOBAL_CONFIG_UID
+import com.android.geto.domain.model.AppSettingsMode
 import com.android.geto.domain.model.AppSettingsResult
 import com.android.geto.domain.repository.UserDataRepository
-import com.android.geto.domain.usecase.ApplyAppSettingsUseCase
-import com.android.geto.domain.usecase.RevertAppSettingsUseCase
+import com.android.geto.domain.usecase.ToggleAppSettingsUseCase
 import com.android.geto.feature.appsettings.getAppSettingsNotification
+import com.android.geto.feature.appsettings.messageRes
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -41,10 +42,7 @@ import javax.inject.Inject
 class SystemWideTileService : TileService() {
 
     @Inject
-    lateinit var applyAppSettingsUseCase: ApplyAppSettingsUseCase
-
-    @Inject
-    lateinit var revertAppSettingsUseCase: RevertAppSettingsUseCase
+    lateinit var toggleAppSettingsUseCase: ToggleAppSettingsUseCase
 
     @Inject
     lateinit var userDataRepository: UserDataRepository
@@ -71,28 +69,18 @@ class SystemWideTileService : TileService() {
         super.onClick()
         serviceScope.launch {
             val userData = userDataRepository.userData.first()
-            val isApplied = userData.isConfigApplied
-            
-            if (isApplied) {
-                val result = revertAppSettingsUseCase()
-                if (result == AppSettingsResult.Success) {
+            val mode = if (userData.isConfigApplied) AppSettingsMode.Revert else AppSettingsMode.Apply
+
+            val result = toggleAppSettingsUseCase(mode)
+
+            when {
+                result == AppSettingsResult.Success && mode == AppSettingsMode.Revert -> {
                     userDataRepository.updateConfigApplied(false)
                     notificationManagerWrapper.cancel(GLOBAL_CONFIG_UID.hashCode())
-                    Toast.makeText(
-                        this@SystemWideTileService,
-                        com.android.geto.feature.appsettings.R.string.revert_success,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else if (result == AppSettingsResult.NoPermission) {
-                    Toast.makeText(
-                        this@SystemWideTileService,
-                        com.android.geto.feature.appsettings.R.string.required_permission_not_granted,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    showToast(result, mode)
                 }
-            } else {
-                val result = applyAppSettingsUseCase()
-                if (result == AppSettingsResult.Success) {
+
+                result == AppSettingsResult.Success && mode == AppSettingsMode.Apply -> {
                     userDataRepository.updateConfigApplied(true)
                     val notificationId = GLOBAL_CONFIG_UID.hashCode()
                     notificationManagerWrapper.notify(
@@ -106,19 +94,19 @@ class SystemWideTileService : TileService() {
                             ongoing = true,
                         )
                     )
-                    Toast.makeText(
-                        this@SystemWideTileService,
-                        com.android.geto.feature.appsettings.R.string.apply_success,
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else if (result == AppSettingsResult.NoPermission) {
-                    Toast.makeText(
-                        this@SystemWideTileService,
-                        com.android.geto.feature.appsettings.R.string.required_permission_not_granted,
-                        Toast.LENGTH_SHORT
-                    ).show()
+                    showToast(result, mode)
                 }
+
+                result == AppSettingsResult.NoPermission -> showToast(result, mode)
             }
         }
+    }
+
+    private fun showToast(result: AppSettingsResult, mode: AppSettingsMode) {
+        Toast.makeText(
+            this,
+            getString(result.messageRes(mode)),
+            Toast.LENGTH_SHORT,
+        ).show()
     }
 }

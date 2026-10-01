@@ -22,12 +22,11 @@ import com.android.geto.domain.common.dispatcher.Dispatcher
 import com.android.geto.domain.common.dispatcher.GetoDispatchers.IO
 import com.android.geto.domain.framework.AssetManagerWrapper
 import com.android.geto.domain.model.AppSettingTemplate
-import com.google.gson.Gson
-import com.google.gson.JsonSyntaxException
-import com.google.gson.reflect.TypeToken
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
+import kotlinx.serialization.SerializationException
+import kotlinx.serialization.json.Json
 import java.io.IOException
 import javax.inject.Inject
 
@@ -35,8 +34,6 @@ internal class DefaultAssetManagerWrapper @Inject constructor(
     @param:Dispatcher(IO) private val ioDispatcher: CoroutineDispatcher,
     @param:ApplicationContext private val context: Context,
 ) : AssetManagerWrapper {
-    private val appSettingsType = object : TypeToken<List<AppSettingTemplate>>() {}.type
-
     private val appSettingTemplatesJson = "AppSettingTemplates.json"
 
     override suspend fun getAppSettingTemplates(): List<AppSettingTemplate> {
@@ -46,11 +43,13 @@ internal class DefaultAssetManagerWrapper @Inject constructor(
             } catch (_: IOException) {
                 null
             }
-        }
+        } ?: return emptyList()
 
         return try {
-            Gson().fromJson(jsonString, appSettingsType) ?: emptyList()
-        } catch (_: JsonSyntaxException) {
+            Json.decodeFromString<List<AppSettingTemplate>>(jsonString)
+        } catch (_: SerializationException) {
+            emptyList()
+        } catch (_: IllegalArgumentException) {
             emptyList()
         }
     }

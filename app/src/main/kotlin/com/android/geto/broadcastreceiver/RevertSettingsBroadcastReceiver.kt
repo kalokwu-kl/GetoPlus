@@ -22,9 +22,11 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import com.android.geto.common.ApplicationScope
+import com.android.geto.domain.model.AppSettingsMode
 import com.android.geto.domain.model.AppSettingsResult
 import com.android.geto.domain.repository.UserDataRepository
-import com.android.geto.domain.usecase.RevertAppSettingsUseCase
+import com.android.geto.domain.usecase.ToggleAppSettingsUseCase
+import com.android.geto.feature.appsettings.messageRes
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper
 import com.android.geto.framework.notificationmanager.AndroidNotificationManagerWrapper.Companion.NOTIFICATION_EXTRA_NOTIFICATION_ID
 import dagger.hilt.android.AndroidEntryPoint
@@ -42,7 +44,7 @@ class RevertSettingsBroadcastReceiver @Inject constructor() : BroadcastReceiver(
     lateinit var appScope: CoroutineScope
 
     @Inject
-    lateinit var revertAppSettingsUseCase: RevertAppSettingsUseCase
+    lateinit var toggleAppSettingsUseCase: ToggleAppSettingsUseCase
 
     @Inject
     lateinit var userDataRepository: UserDataRepository
@@ -56,26 +58,19 @@ class RevertSettingsBroadcastReceiver @Inject constructor() : BroadcastReceiver(
         val appContext = context?.applicationContext
 
         appScope.launch {
-            val result = revertAppSettingsUseCase()
+            val result = toggleAppSettingsUseCase(AppSettingsMode.Revert)
 
             if (result == AppSettingsResult.Success) {
                 userDataRepository.updateConfigApplied(false)
                 notificationManagerWrapper.cancel(notificationId)
+            }
+
+            if (result == AppSettingsResult.Success || result == AppSettingsResult.NoPermission) {
                 withContext(Dispatchers.Main) {
                     appContext?.let {
                         Toast.makeText(
                             it,
-                            com.android.geto.feature.appsettings.R.string.revert_success,
-                            Toast.LENGTH_SHORT,
-                        ).show()
-                    }
-                }
-            } else if (result == AppSettingsResult.NoPermission) {
-                withContext(Dispatchers.Main) {
-                    appContext?.let {
-                        Toast.makeText(
-                            it,
-                            com.android.geto.feature.appsettings.R.string.required_permission_not_granted,
+                            it.getString(result.messageRes(AppSettingsMode.Revert)),
                             Toast.LENGTH_SHORT,
                         ).show()
                     }

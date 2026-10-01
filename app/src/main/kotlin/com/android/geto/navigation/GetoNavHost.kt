@@ -18,6 +18,9 @@
 package com.android.geto.navigation
 
 import android.os.Build
+import androidx.activity.compose.LocalActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -27,12 +30,19 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.LifecycleOwner
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import com.android.geto.R
@@ -40,9 +50,6 @@ import com.android.geto.feature.appsettings.navigation.AppSettingsRouteData
 import com.android.geto.feature.appsettings.navigation.appSettingsScreen
 import com.android.geto.feature.settings.navigation.navigateToSettings
 import com.android.geto.feature.settings.navigation.settingsScreen
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.PermissionStatus
-import com.google.accompanist.permissions.rememberPermissionState
 
 @Composable
 fun GetoNavHost(navController: NavHostController) {
@@ -71,31 +78,56 @@ fun GetoNavHost(navController: NavHostController) {
 }
 
 @Composable
-@OptIn(ExperimentalPermissionsApi::class)
 private fun PostNotificationsPermission(snackbarHostState: SnackbarHostState) {
     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
 
-    val notificationsPermissionState = rememberPermissionState(
-        android.Manifest.permission.POST_NOTIFICATIONS,
-    )
+    val activity = LocalActivity.current ?: return
+
+    val lifecycle = (activity as? LifecycleOwner)?.lifecycle ?: return
 
     val message = stringResource(R.string.please_grant_notifications_permission)
 
     val actionLabel = stringResource(R.string.allow)
 
-    LaunchedEffect(key1 = notificationsPermissionState) {
-        val status = notificationsPermissionState.status
+    var isGranted by remember {
+        mutableStateOf(
+            activity.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED,
+        )
+    }
 
-        if (status is PermissionStatus.Denied && !status.shouldShowRationale) {
-            val snackbarResult = snackbarHostState.showSnackbar(
-                message = message,
-                actionLabel = actionLabel,
-                duration = SnackbarDuration.Indefinite,
-            )
+    var checkTick by remember { mutableStateOf(0) }
 
-            if (snackbarResult == SnackbarResult.ActionPerformed) {
-                notificationsPermissionState.launchPermissionRequest()
+    val launcher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission(),
+    ) { granted ->
+        isGranted = granted
+        checkTick++
+    }
+
+    DisposableEffect(activity) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_RESUME) {
+                isGranted = activity.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) == android.content.pm.PackageManager.PERMISSION_GRANTED
+                checkTick++
             }
+        }
+        lifecycle.addObserver(observer)
+        onDispose { lifecycle.removeObserver(observer) }
+    }
+
+    LaunchedEffect(isGranted, checkTick) {
+        if (isGranted || activity.shouldShowRequestPermissionRationale(android.Manifest.permission.POST_NOTIFICATIONS)) {
+            return@LaunchedEffect
+        }
+
+        val snackbarResult = snackbarHostState.showSnackbar(
+            message = message,
+            actionLabel = actionLabel,
+            duration = SnackbarDuration.Indefinite,
+        )
+
+        if (snackbarResult == SnackbarResult.ActionPerformed) {
+            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         }
     }
 }

@@ -77,6 +77,7 @@ import com.android.geto.domain.common.GLOBAL_CONFIG_UID
 import com.android.geto.domain.model.AddAppSettingResult
 import com.android.geto.domain.model.AppSetting
 import com.android.geto.domain.model.AppSettingTemplate
+import com.android.geto.domain.model.AppSettingsMode
 import com.android.geto.domain.model.AppSettingsResult
 import com.android.geto.domain.model.SecureSetting
 import com.android.geto.domain.model.SettingType
@@ -283,57 +284,48 @@ private fun AppSettingsLaunchedEffects(
 
     val androidNotificationManagerWrapper = LocalNotificationManager.current
 
-    val appSettingsDisabled = stringResource(id = R.string.app_settings_disabled)
+    val appSettingAddSuccess = stringResource(id = R.string.app_setting_added_successfully)
 
-    val emptyAppSettingsList = stringResource(id = R.string.empty_app_settings_list)
-
-    val applySuccess = stringResource(id = R.string.apply_success)
+    val appSettingAddFailed = stringResource(id = R.string.app_setting_already_exists)
 
     val appliedNotificationTitle = stringResource(R.string.applied_notification_title)
 
     val appliedNotificationText = stringResource(R.string.applied_notification_text)
 
-    val applyFailure = stringResource(id = R.string.apply_failure)
-
-    val revertFailure = stringResource(id = R.string.revert_failure)
-
-    val revertSuccess = stringResource(id = R.string.revert_success)
-
-    val invalidValues = stringResource(R.string.settings_has_invalid_values)
-
-    val appSettingAddSuccess = stringResource(R.string.app_setting_added_successfully)
-
-    val appSettingAddFailed = stringResource(R.string.app_setting_already_exists)
-
-    val requiredPermissionNotGranted = stringResource(R.string.required_permission_not_granted)
-
-    LaunchedEffect(key1 = applyAppSettingsResult) {
-        when (applyAppSettingsResult) {
-            AppSettingsResult.DisabledAppSettings -> {
-                snackbarHostState.showSnackbar(message = appSettingsDisabled)
-            }
-
-            AppSettingsResult.EmptyAppSettings -> {
-                snackbarHostState.showSnackbar(message = emptyAppSettingsList)
-            }
-
-            AppSettingsResult.Failure -> {
-                snackbarHostState.showSnackbar(message = applyFailure)
-            }
-
+    suspend fun handleAppSettingsResult(
+        result: AppSettingsResult,
+        mode: AppSettingsMode,
+        onSuccess: suspend () -> Unit,
+    ) {
+        when (result) {
             AppSettingsResult.NoPermission -> {
                 Toast.makeText(
                     context,
-                    requiredPermissionNotGranted,
+                    context.getString(result.messageRes(mode)),
                     Toast.LENGTH_SHORT,
                 ).show()
                 onNoPermission()
             }
 
             AppSettingsResult.Success -> {
-                val notificationId = GLOBAL_CONFIG_UID.hashCode()
+                Toast.makeText(
+                    context,
+                    context.getString(result.messageRes(mode)),
+                    Toast.LENGTH_SHORT,
+                ).show()
+                onSuccess()
+            }
 
-                Toast.makeText(context, applySuccess, Toast.LENGTH_SHORT).show()
+            else -> {
+                snackbarHostState.showSnackbar(context.getString(result.messageRes(mode)))
+            }
+        }
+    }
+
+    LaunchedEffect(key1 = applyAppSettingsResult) {
+        applyAppSettingsResult?.let { result ->
+            handleAppSettingsResult(result, AppSettingsMode.Apply) {
+                val notificationId = GLOBAL_CONFIG_UID.hashCode()
 
                 androidNotificationManagerWrapper.notify(
                     id = notificationId,
@@ -347,56 +339,16 @@ private fun AppSettingsLaunchedEffects(
                     ),
                 )
             }
-
-            AppSettingsResult.InvalidValues -> {
-                snackbarHostState.showSnackbar(
-                    message = invalidValues,
-                )
-            }
-
-            null -> Unit
         }
 
         onResetApplyAppSettingsResult()
     }
 
     LaunchedEffect(key1 = revertAppSettingsResult) {
-        when (revertAppSettingsResult) {
-            AppSettingsResult.DisabledAppSettings -> {
-                snackbarHostState.showSnackbar(message = appSettingsDisabled)
+        revertAppSettingsResult?.let { result ->
+            handleAppSettingsResult(result, AppSettingsMode.Revert) {
+                androidNotificationManagerWrapper.cancel(GLOBAL_CONFIG_UID.hashCode())
             }
-
-            AppSettingsResult.EmptyAppSettings -> {
-                snackbarHostState.showSnackbar(message = emptyAppSettingsList)
-            }
-
-            AppSettingsResult.Failure -> {
-                snackbarHostState.showSnackbar(message = revertFailure)
-            }
-
-            AppSettingsResult.NoPermission -> {
-                Toast.makeText(
-                    context,
-                    requiredPermissionNotGranted,
-                    Toast.LENGTH_SHORT,
-                ).show()
-                onNoPermission()
-            }
-
-            AppSettingsResult.Success -> {
-                Toast.makeText(context, revertSuccess, Toast.LENGTH_SHORT).show()
-
-                val notificationId = GLOBAL_CONFIG_UID.hashCode()
-                androidNotificationManagerWrapper.cancel(notificationId)
-            }
-
-            AppSettingsResult.InvalidValues -> {
-                snackbarHostState.showSnackbar(
-                    message = invalidValues,
-                )
-            }
-
-            null -> Unit
         }
 
         onResetRevertAppSettingsResult()

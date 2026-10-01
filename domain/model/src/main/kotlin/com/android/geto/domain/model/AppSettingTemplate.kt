@@ -17,6 +17,9 @@
  */
 package com.android.geto.domain.model
 
+import kotlinx.serialization.Serializable
+
+@Serializable
 data class AppSettingTemplate(
     val settingType: SettingType,
     val label: String,

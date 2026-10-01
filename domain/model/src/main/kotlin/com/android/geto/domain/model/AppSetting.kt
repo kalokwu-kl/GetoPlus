@@ -17,6 +17,8 @@
  */
 package com.android.geto.domain.model
 
+import kotlinx.serialization.Serializable
+
 data class AppSetting(
     val id: Int = 0,
     val enabled: Boolean,
@@ -28,6 +30,7 @@ data class AppSetting(
     val valueOnRevert: String,
 )
 
+@Serializable
 enum class SettingType {
     SYSTEM,
     SECURE,

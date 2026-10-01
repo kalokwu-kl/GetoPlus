@@ -23,15 +23,15 @@ import com.android.geto.domain.framework.AssetManagerWrapper
 import com.android.geto.domain.model.AddAppSettingResult
 import com.android.geto.domain.model.AppSetting
 import com.android.geto.domain.model.AppSettingTemplate
+import com.android.geto.domain.model.AppSettingsMode
 import com.android.geto.domain.model.AppSettingsResult
 import com.android.geto.domain.model.SecureSetting
 import com.android.geto.domain.model.SettingType
 import com.android.geto.domain.repository.AppSettingsRepository
 import com.android.geto.domain.repository.UserDataRepository
 import com.android.geto.domain.usecase.AddAppSettingUseCase
-import com.android.geto.domain.usecase.ApplyAppSettingsUseCase
 import com.android.geto.domain.usecase.GetSecureSettingsByNameUseCase
-import com.android.geto.domain.usecase.RevertAppSettingsUseCase
+import com.android.geto.domain.usecase.ToggleAppSettingsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -49,8 +49,7 @@ import javax.inject.Inject
 class AppSettingsViewModel @Inject constructor(
     private val appSettingsRepository: AppSettingsRepository,
     private val userDataRepository: UserDataRepository,
-    private val applyAppSettingsUseCase: ApplyAppSettingsUseCase,
-    private val revertAppSettingsUseCase: RevertAppSettingsUseCase,
+    private val toggleAppSettingsUseCase: ToggleAppSettingsUseCase,
     private val addAppSettingUseCase: AddAppSettingUseCase,
     private val assetManagerWrapper: AssetManagerWrapper,
     private val getSecureSettingsByNameUseCase: GetSecureSettingsByNameUseCase,
@@ -96,17 +95,23 @@ class AppSettingsViewModel @Inject constructor(
 
     fun toggleConfig(isConfigApplied: Boolean) {
         viewModelScope.launch {
-            if (isConfigApplied) {
-                val result = revertAppSettingsUseCase()
-                _revertAppSettingsResult.update { result }
-                if (result == AppSettingsResult.Success) {
-                    userDataRepository.updateConfigApplied(false)
+            val mode = if (isConfigApplied) AppSettingsMode.Revert else AppSettingsMode.Apply
+
+            val result = toggleAppSettingsUseCase(mode)
+
+            when (mode) {
+                AppSettingsMode.Revert -> {
+                    _revertAppSettingsResult.update { result }
+                    if (result == AppSettingsResult.Success) {
+                        userDataRepository.updateConfigApplied(false)
+                    }
                 }
-            } else {
-                val result = applyAppSettingsUseCase()
-                _applyAppSettingsResult.update { result }
-                if (result == AppSettingsResult.Success) {
-                    userDataRepository.updateConfigApplied(true)
+
+                AppSettingsMode.Apply -> {
+                    _applyAppSettingsResult.update { result }
+                    if (result == AppSettingsResult.Success) {
+                        userDataRepository.updateConfigApplied(true)
+                    }
                 }
             }
         }

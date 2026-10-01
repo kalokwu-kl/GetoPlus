@@ -20,6 +20,7 @@ package com.android.geto.domain.usecase
 import com.android.geto.domain.common.dispatcher.Dispatcher
 import com.android.geto.domain.common.dispatcher.GetoDispatchers.Default
 import com.android.geto.domain.framework.SecureSettingsWrapper
+import com.android.geto.domain.model.AppSettingsMode
 import com.android.geto.domain.model.AppSettingsResult
 import com.android.geto.domain.model.AppSettingsResult.DisabledAppSettings
 import com.android.geto.domain.model.AppSettingsResult.EmptyAppSettings
@@ -32,37 +33,41 @@ import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
-class RevertAppSettingsUseCase @Inject constructor(
+class ToggleAppSettingsUseCase @Inject constructor(
     @param:Dispatcher(Default) private val defaultDispatcher: CoroutineDispatcher,
     private val appSettingsRepository: AppSettingsRepository,
     private val secureSettingsWrapper: SecureSettingsWrapper,
 ) {
-    suspend operator fun invoke(): AppSettingsResult =
-        withContext(defaultDispatcher) {
-            val appSettings =
-                appSettingsRepository.getAppSettings()
+    suspend operator fun invoke(mode: AppSettingsMode): AppSettingsResult = withContext(defaultDispatcher) {
+        val appSettings =
+            appSettingsRepository.getAppSettings()
 
-            if (appSettings.isEmpty()) return@withContext EmptyAppSettings
+        if (appSettings.isEmpty()) return@withContext EmptyAppSettings
 
-            if (appSettings.all { !it.enabled }) return@withContext DisabledAppSettings
+        val enabledAppSettings = appSettings.filter { it.enabled }
 
-            try {
-                if (appSettings.all { appSetting ->
-                        secureSettingsWrapper.canWriteSecureSettings(
-                            settingType = appSetting.settingType,
-                            key = appSetting.key,
-                            value = appSetting.valueOnRevert,
-                        )
-                    }
-                ) {
-                    Success
-                } else {
-                    Failure
+        if (enabledAppSettings.isEmpty()) return@withContext DisabledAppSettings
+
+        try {
+            if (enabledAppSettings.all { appSetting ->
+                    secureSettingsWrapper.canWriteSecureSettings(
+                        settingType = appSetting.settingType,
+                        key = appSetting.key,
+                        value = when (mode) {
+                            AppSettingsMode.Apply -> appSetting.valueOnLaunch
+                            AppSettingsMode.Revert -> appSetting.valueOnRevert
+                        },
+                    )
                 }
-            } catch (_: SecurityException) {
-                NoPermission
-            } catch (_: IllegalArgumentException) {
-                InvalidValues
+            ) {
+                Success
+            } else {
+                Failure
             }
+        } catch (_: SecurityException) {
+            NoPermission
+        } catch (_: IllegalArgumentException) {
+            InvalidValues
         }
+    }
 }

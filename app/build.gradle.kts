@@ -66,7 +66,6 @@ dependencies {
     implementation(projects.framework.notificationManager)
     implementation(projects.framework.secureSettings)
 
-    implementation(libs.accompanist.permissions)
     implementation(libs.androidx.activity.ktx)
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.core.ktx)
