@@ -27,8 +27,8 @@ android {
 
     defaultConfig {
         applicationId = "com.android.geto"
-        versionCode = 171
-        versionName = "1.17.1"
+        versionCode = 200
+        versionName = "2.0.0"
 
         vectorDrawables {
             useSupportLibrary = true
