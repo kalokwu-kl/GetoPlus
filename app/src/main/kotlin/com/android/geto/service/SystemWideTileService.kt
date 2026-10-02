@@ -20,7 +20,6 @@ package com.android.geto.service
 import android.service.quicksettings.Tile
 import android.service.quicksettings.TileService
 import android.widget.Toast
-import com.android.geto.R
 import com.android.geto.domain.common.GLOBAL_CONFIG_UID
 import com.android.geto.domain.model.AppSettingsMode
 import com.android.geto.domain.model.AppSettingsResult
@@ -54,9 +53,6 @@ class SystemWideTileService : TileService() {
 
     override fun onStartListening() {
         super.onStartListening()
-        qsTile.label = getString(R.string.system_wide_config)
-        qsTile.contentDescription = getString(R.string.system_wide_config)
-        qsTile.updateTile()
         serviceScope.launch {
             userDataRepository.userData.collectLatest { userData ->
                 qsTile.state = if (userData.isConfigApplied) Tile.STATE_ACTIVE else Tile.STATE_INACTIVE
