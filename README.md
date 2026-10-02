@@ -36,7 +36,7 @@ Getting Started
 
 - [Android Studio](https://developer.android.com/studio) (latest stable)
 - Java 17 or 21 (bundled with Android Studio, or via [SDKMAN](https://sdkman.io))
-- Android SDK (installed via Android Studio's SDK Manager)
+- Android SDK (installed via Android Studio's SDK Manager; provides `adb` from platform-tools)
 
 ### Build from source
 
@@ -47,19 +47,19 @@ cd GetoPlus
 
 # Build a debug APK
 ./gradlew assembleDebug
-
-# Build a release APK (smaller file size, requires a signing key)
-./gradlew assembleRelease
 ```
 
 The debug APK will be at `app/build/outputs/apk/debug/app-debug.apk`.
 
-For a **release build** with smaller file size:
+### Build a release APK
 
-1. Generate a signing key (or use Android Studio's **Build > Generate Signed APK** wizard)
-2. Place `key.properties` in the project root or configure signing in `app/build.gradle.kts`
-3. Run `./gradlew assembleRelease`
-4. The release APK will be at `app/build/outputs/apk/release/app-release.apk`
+The easiest way is Android Studio's **Build > Generate Signed App Bundle / APK** wizard
+(**APK**): create or reuse a keystore, and the signed APK lands at
+`app/build/outputs/apk/release/app-release.apk`.
+
+Alternatively, `./gradlew assembleRelease` produces an **unsigned** APK
+(`app-release-unsigned.apk`) that cannot be installed unless you add your own
+`signingConfigs` in `app/build.gradle.kts`.
 
 Release builds use R8 shrinking and resource minification for a smaller APK.
 
@@ -71,6 +71,16 @@ Release builds use R8 shrinking and resource minification for a smaller APK.
 ```
 
 Or open the project in Android Studio and press **Run** (▶).
+
+### Grant the required permission
+
+The app needs `WRITE_SECURE_SETTINGS`. Enable **Developer options > USB debugging**,
+connect the device, then run:
+
+```bash
+adb shell pm grant com.android.geto.debug android.permission.WRITE_SECURE_SETTINGS  # debug build
+adb shell pm grant com.android.geto android.permission.WRITE_SECURE_SETTINGS         # release build
+```
 
 License
 =======
