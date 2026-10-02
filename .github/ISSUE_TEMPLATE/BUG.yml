@@ -11,10 +11,7 @@ body:
         **Note: Before submitting a bug report, please make sure that the issue hasn't been reported
         before. Check the existing issues and confirm that this is not a duplicate.**
         
-        **By submitting this issue, you agree to follow the project's
-        [code of conduct](https://github.com/JackEblan/Geto/blob/master/CODE_OF_CONDUCT.md).**
-        
-        **Please check and verify that you are using the latest version of Geto before
+        **Please check and verify that you are using the latest version of Geto+ before
         submitting this bug report.**
         
         **Please ensure that you provide complete and accurate information to expedite the
@@ -31,9 +28,7 @@ body:
       options:
         - label: I confirm that this issue is not a duplicate and hasn't been reported before.
           required: true
-        - label: I agree to follow the project's code of conduct.
-          required: true
-        - label: I have checked and verified that I am using the latest version of Geto from GitHub or F-Droid.
+        - label: I have checked and verified that I am using the latest version of Geto+ from GitHub.
           required: true
   - type: checkboxes
     id: additional-terms
@@ -64,7 +59,7 @@ body:
     id: version
     attributes:
       label: Version name
-      description: Specify the version name of Geto you are using.
+      description: Specify the version name of Geto+ you are using.
       placeholder: Latest version recommended.
     validations:
       required: true
@@ -72,10 +67,9 @@ body:
     id: download-source
     attributes:
       label: Download source
-      description: Did you download Geto from GitHub or F-Droid?
+      description: Did you download Geto+ from GitHub?
       options:
         - GitHub
-        - F-Droid
     validations:
       required: true
   - type: textarea

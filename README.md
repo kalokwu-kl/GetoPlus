@@ -6,8 +6,8 @@
 
 Toggle system settings from your Quick Settings tile — globally, with one tap.
 
-![GitHub Release](https://img.shields.io/github/v/release/JackEblan/Geto?style=for-the-badge)
-![GitHub License](https://img.shields.io/github/license/JackEblan/Geto?style=for-the-badge)
+![GitHub Release](https://img.shields.io/github/v/release/kalokwu-kl/GetoPlus?style=for-the-badge)
+![GitHub License](https://img.shields.io/github/license/kalokwu-kl/GetoPlus?style=for-the-badge)
 
 </div>
 
@@ -42,8 +42,8 @@ Getting Started
 
 ```bash
 # Clone the repository
-git clone https://github.com/YOUR_USERNAME/Geto
-cd Geto
+git clone https://github.com/kalokwu-kl/GetoPlus
+cd GetoPlus
 
 # Build a debug APK
 ./gradlew assembleDebug

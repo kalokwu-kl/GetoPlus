@@ -10,11 +10,8 @@ body:
         **Note: Before submitting a feature request, please check the existing issues to ensure that
         your request has not been previously suggested.**
         
-        **By submitting this issue, you agree to follow the project's
-        [code of conduct](https://github.com/JackEblan/Geto/blob/master/CODE_OF_CONDUCT.md).**
-        
-        **Please check and verify that you are using the latest version of Geto before
-        submitting this bug report.**
+        **Please check and verify that you are using the latest version of Geto+ before
+        submitting this request.**
         
         **Your feature request will be reviewed, and its implementation will be considered based on
         project goals and priorities.**
@@ -29,9 +26,7 @@ body:
       options:
         - label: I confirm that this feature request has not been previously suggested.
           required: true
-        - label: I agree to follow the project's code of conduct.
-          required: true
-        - label: I have checked and verified that I am using the latest version of Geto from GitHub or F-Droid.
+        - label: I have checked and verified that I am using the latest version of Geto+ from GitHub.
           required: true
   - type: checkboxes
     id: additional-terms
@@ -60,6 +55,6 @@ body:
     id: benefits
     attributes:
       label: Benefits
-      placeholder: Describe the benefits or improvements this feature would bring to Geto.
+      placeholder: Describe the benefits or improvements this feature would bring to Geto+.
     validations:
       required: true
